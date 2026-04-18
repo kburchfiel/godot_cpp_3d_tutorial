@@ -1,0 +1,14 @@
+.vscode
+godot-cpp/**
+**.os
+.godot
+**.so
+**.uid
+**.dblite
+export_presets.cfg
+.ipynb_checkpoints/README-checkpoint.md
+.editorconfig
+.gitattributes
+*.import
+CMakeFiles/
+build/
