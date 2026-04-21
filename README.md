@@ -252,13 +252,125 @@ Here's what the Ground should look like at this point:
 ![](/tutorial_screenshots/game_area.png)
 
 
+1. Now that we have a game scene in place, this will be a good time to begin work on our Mnchar (main character) class. There's plenty more C++ code that will get added to main.cpp and main.h, but those additions will be easier to implement and debug once we have actual characters and projectiles to manage.
+
+## Part 4: Laying the foundations for our Mnchar class
+
+1. Our Mnchar class, which players will be able to control via game controllers, will fire projectiles and (potentially) get hit by other projectiles. We'll eventually configure our game such that anywhere from 2-8 Mnchars can get added to the game scene at the start of each game; however, that configuration will involve a Hud class that we won't be setting up for a little while.
+
+1. To begin the setup process, create both a 'mnchar.h' and a 'mnchar.cpp' file within your src folder. Enter the following code into mnchar.h:
+
+    ```
+    #pragma once
+
+    #include <godot_cpp/classes/character_body3d.hpp>
+    #include <godot_cpp/variant/utility_functions.hpp>
+
+    using namespace godot;
+
+    class Mnchar : public CharacterBody3D {
+    GDCLASS(Mnchar, CharacterBody3D)
+
+    private:
+    double movement_speed = 14;
+    
+    protected:
+    static void _bind_methods();
+
+    public:
+    Mnchar();
+    ~Mnchar();
+
+    void set_movement_speed(const double movement_speed);
+    double get_movement_speed() const;
+
+
+    };
+    ```
+
+    (Source: References 1, 2, and 4)
+
+    This code is very similar to that found within main.h. One new addition of note is `movement_speed`, a double that controls the Mnchar's movement speed in meters per second, along with its corresponding setter and getter functions. We'll make it possible to update this value within the editor. 
+
+    Also note that, because Mnchar will extend CharacterBody3D, we need to include its header file within this source file. (I chose to use CharacterBody3D as my player's class because the Your First 3D Game tutorial uses this same class; see Reference 5. Code for the CharacterBody3D class itself can be found in References 6 and 7.
+
+1. Next, within mnchar.cpp, enter the following:
+
+    ```
+    #include "mnchar.h"
+    #include <godot_cpp/core/class_db.hpp>
+
+    using namespace godot;
+
+    void Mnchar::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("get_movement_speed"),
+                        &Mnchar::get_movement_speed);
+    ClassDB::bind_method(D_METHOD("set_movement_speed", "p_movement_speed"),
+                        &Mnchar::set_movement_speed);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "movement_speed"),
+                "set_movement_speed", "get_movement_speed");
+
+    }
+
+    Mnchar::Mnchar() {}
+
+    Mnchar::~Mnchar() {}
+
+
+
+    void Mnchar::set_movement_speed(const double p_movement_speed) {
+    movement_speed = p_movement_speed;
+    }
+
+    double Mnchar::get_movement_speed() const { return movement_speed; }
+
+    ```
+
+    (Source: References 1 and 2)
+
+    This code, like that in main.h, is quite barebones; our priority is simply to add in a class that the Godot editor will recognize. Once we create and configure a Mnchar scene within the editor, we'll then come back and extend this code. 
+
+    However, I did also add in code that will allow us to modify the movement speed within the editor. This isn't a crucial part of this particular game, but it *will* allow you to test out different movement speeds without having to recompile the code--not that that's a huge hurdle.
+
+    This speed-adjustment code consists of two functions (`set_movement_speed()` and `get_movement_speed()`) that let us specify and retrieve, respectively, the player's speed. Both of these functions (including the former's `p_movement_speed` argument) have corresponding bind_method() calls within `_bind_methods()`. In addition, we have an ADD_PROPERTY() call that tells the editor about the `movement_speed` variable along with its setter and getter functions. (These are all based on the `amplitude` property within the GDExample class in Reference 1.)
+
+    (It is *not* necessary to add in this code for all properties of a class. However, they're very important for certain items, such as signals--which we'll get to later.)
+
+1. This new code should compile at this point; however, if we tried to do so, we most likely wouldn't be able to locate a Mnchar class within our editor. That's because we also need to update register_types.cpp with information about this class. Fortunately, this is easy to do so. Right under `#include "main.h"`, add `#include "mnchar.h"`. Next, right under `GDREGISTER_CLASS(Main);`, add `GDREGISTER_CLASS(Mnchar);`. 
+
+1. *Now* run `scons platform=[your_os]` to compile this new Mnchar-related code. In my case, the editor still didn't show the Mnchar class within the 'Create New Node' menu after this step, but it did present it once I closed and relaunched my editor. Thus, I'd recommend that you do the same at this point.
+
+1. Back in the editor, create a new scene. Click the 'Other Node' button under the 'Create Root Node:' prompt; search for 'Mnchar'; then double-click it. Next, save this scene as mnchar.tscn.
+
+    You *should* see the custom Movement Speed property that we configured near the top of the Inspector menu, along with our default value (14). Changing this value in the editor will also change the Mnchar's behavior within our game.
+
+    ![](/tutorial_screenshots/early_mnchar_scene.png)
+
+    (I have found, however, that this property will sometimes disappear from the editor after compiling my code. This might be caused by an issue with my current setup, but it might also be a glitch within the editor itself. Closing, then relaunching the editor always seems to resolve this issue, thankfully.)
+
+
+[Here with editing. Next, configure the Mnchar's shape and add in movement code. Then configure your start function and add in code that will place a single Mnchar within the game area. (You can later update this code to add in two characters, and then the number specified within your Hud class.)]
+
+
 
 ## References
 
 Note: In some cases, a reference within this list was itself based heavily (or even entirely) on another reference. However, in order to keep this list simple and manageable, I won't include such details. You can find more information about the sources used for these references within their own repositories.
 
-Reference 1: https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html
+In addition, references that begin with '/godot-cpp' refer to a file within a *compiled* godot-cpp repository. (See Part 1 for more details on (1) how to access and compile this repository and (2) the exact version I'm using.)
 
-Reference 2: https://github.com/kburchfiel/godot_cpp_3d_demo/blob/main/src/main.h
+* Reference 1: https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html
 
-Reference 3: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/01.game_setup.html
+* Reference 2: https://github.com/kburchfiel/godot_cpp_3d_demo/
+
+    (Note: Since this repository is essentially a step-by-step tutorial to creating the code in Reference 2, both source files correspond very closely to one another. For example, the mnchar.h code within this repository was based mostly on https://github.com/kburchfiel/godot_cpp_3d_demo/blob/main/src/mnchar.h .)
+
+* Reference 3: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/01.game_setup.html
+
+* Reference 4: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/03.player_movement_code.html
+
+* Reference 5: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/02.player_input.html
+
+* Reference 6: /godot-cpp/gen/src/classes/character_body3d.cpp
+
+* Reference 7: /godot-cpp/gen/include/godot_cpp/classes/character_body3d.hpp
