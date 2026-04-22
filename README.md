@@ -13,7 +13,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 (Note: Many of these steps will resemble those in the excellent 'Getting started' section of the official GDExtension documentation at https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html . Certain code blocks within this section derive from that document as well.)
 
-1. Go ahead and create a new folder that will store your Godot project and its corresponding code. I'll call mine `godot_cpp_3d_tutorial`, but the name you choose is of course up to you.
+1. Create a new folder that will store your Godot project and its corresponding code. I'll call mine `godot_cpp_3d_tutorial`, but the name you choose is of course up to you.
 
 1. First, you'll want to download the latest stable version of godot-cpp from https://github.com/godotengine/godot-cpp . (As of 2026-04-17, a stable version of version 10.x hasn't yet been released, so I went ahead and downloaded the beta version with a commit ID of 4862a9d (https://github.com/godotengine/godot-cpp/tree/4862a9dcf1471c9ea19680b9faadb5b6a9432092 .) Whether you download and unzip or simply clone it, make sure that exists within your project folder within a folder named 'godot-cpp'.
 
@@ -26,7 +26,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     ![](/tutorial_screenshots/new_game_project.png)
 
 
-1. Next, go ahead and close out of the editor. Before we create a scene, we should first create a GDExtension class within C++ that can be used as the basis for that scene. (This is a different approach than what you might be used to with GDScript.)
+1. Close back out of the editor for now. Before we create a scene, we should first create a GDExtension class within C++ that can be used as the basis for that scene. (This is a different approach than what you might be used to with GDScript.)
 
 1. Before we start writing our own C++ code, let's get a few crucial setup tasks out of the way. First, within your project folder, which will now have a number of Godot-generated items (including a project.godot) file, go ahead and create a new folder called 'bin.' Within this folder, create a new file called gdexample.gdextension, then paste the following material into it:
 
@@ -430,10 +430,10 @@ Here's what the Ground should look like at this point:
 
     ```
       ClassDB::bind_method(D_METHOD("get_mnchar_scene"), &Main::get_mnchar_scene);
-  ClassDB::bind_method(D_METHOD("set_mnchar_scene", "mnchar_scene"),
+    ClassDB::bind_method(D_METHOD("set_mnchar_scene", "mnchar_scene"),
                        &Main::set_mnchar_scene);
 
-  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
                             PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
                "set_mnchar_scene", "get_mnchar_scene");
     ```
@@ -542,7 +542,7 @@ Notes:
 
 * Reference 2: https://github.com/kburchfiel/godot_cpp_3d_demo/
 
-    (Note: Since this repository is essentially a step-by-step tutorial to creating the code in Reference 2, both source files correspond very closely to one another. For example, the mnchar.h code within this repository was based mostly on https://github.com/kburchfiel/godot_cpp_3d_demo/blob/main/src/mnchar.h .)
+    * Since this repository is essentially a step-by-step tutorial to creating the code in Reference 2, both source files correspond very closely to one another. For example, the mnchar.h code within this repository was based mostly on https://github.com/kburchfiel/godot_cpp_3d_demo/blob/main/src/mnchar.h .
 
 * Reference 3: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/01.game_setup.html
 
@@ -555,9 +555,6 @@ Notes:
 * Reference 7: /godot-cpp/gen/include/godot_cpp/classes/character_body3d.hpp
 
 * Reference 8: https://github.com/kburchfiel/cpp_yf2dg_gd_4pt_6
-
-
-    Notes: 
     
     * The vast majority of the code in this repository came from https://github.com/j-dax/gd-cpp , which was released under the BSD-3-Clause license by Matthew Piazza. My repository simply converted that code into a step-by-step guide (similar to this one one).
 
