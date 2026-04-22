@@ -1,3 +1,30 @@
 [gd_scene format=3 uid="uid://c8dgny737ctoe"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1ngy0"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_0j8lf"]
+material = SubResource("StandardMaterial3D_1ngy0")
+size = Vector3(2, 2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0j8lf"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ygbm5"]
+material = SubResource("StandardMaterial3D_0j8lf")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1ngy0"]
+size = Vector3(2, 2, 2)
+
 [node name="Mnchar" type="Mnchar" unique_id=1778936489]
+
+[node name="Pivot" type="Node3D" parent="." unique_id=1471396128]
+
+[node name="Body" type="MeshInstance3D" parent="Pivot" unique_id=1908363147]
+mesh = SubResource("BoxMesh_0j8lf")
+
+[node name="Turret" type="MeshInstance3D" parent="Pivot" unique_id=1016750743]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.25)
+mesh = SubResource("BoxMesh_ygbm5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1839025695]
+shape = SubResource("BoxShape3D_1ngy0")

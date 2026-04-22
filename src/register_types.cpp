@@ -13,8 +13,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
         return;
     }
 
-    GDREGISTER_CLASS(Main);
-    GDREGISTER_CLASS(Mnchar);
+    GDREGISTER_RUNTIME_CLASS(Main);
+    GDREGISTER_RUNTIME_CLASS(Mnchar);
 
 }
 

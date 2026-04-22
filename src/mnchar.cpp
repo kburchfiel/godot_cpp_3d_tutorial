@@ -24,3 +24,7 @@ void Mnchar::set_movement_speed(const double p_movement_speed) {
 }
 
 double Mnchar::get_movement_speed() const { return movement_speed; }
+
+void Mnchar::start(Vector3 mnchar_translate_arg)
+
+{translate(mnchar_translate_arg);}

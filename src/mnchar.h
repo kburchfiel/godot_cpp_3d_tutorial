@@ -21,4 +21,5 @@ public:
   void set_movement_speed(const double movement_speed);
   double get_movement_speed() const;
 
+void start(Vector3 mnchar_translate_arg);
 };

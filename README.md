@@ -168,7 +168,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     };
     ```
-    (Source: Reference 2)
+    (Source: Reference 8)
 
     Here, we're declaring a GDExtension class called 'Main' that will inherit from Node. We're also adding some fundamental functions (e.g. constructors, destructors, _bind_methods(), and _ready()). Lots more will be added to this file later on, but I wanted to focus on the items we'll need at this moment.
 
@@ -191,7 +191,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     }
     ```
 
-    (Source: Reference 2)
+    (Source: Reference 8)
 
     This is all pretty barebones so far, but we'll expand this file quite a bit later in the tutorial.
 
@@ -207,10 +207,17 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 1. Next, within the `initialize_example_module()` function, add the following text right before the final closing bracket:
 
     ```
-    GDREGISTER_CLASS(Main);
+    GDREGISTER_RUNTIME_CLASS(Main);
     ```
 
-    These two updates allow Godot to learn about our Main GDExtension class. We'll repeat these simple updates for all other classes that we define. (Source: Reference 2)
+    These two updates allow Godot to learn about our Main GDExtension class. We'll repeat these simple updates for all other classes that we define. 
+    
+    Note: I'm using GDREGISTER_RUNTIME_CLASS here rather than GDREGISTER_CLASS so that this code will only run when I'm actually running my project. With GDREGISTER_CLASS, code can also run (or at least attempt to run) in the editor, which can cause some irritating crashes. (For instance, suppose your code for a class references a Pivot object that you haven't yet created. If you then attempt to launch the editor after compiling this code, the editor will attempt to find this object, fail, and potentially crash. To avoid the need to comment out that code, add the object into your editor, and then recompile it, you can simply make that class a *runtime* class.)
+
+
+    (Sources: References 8, 9, and 10)
+
+
 
 1. Go ahead and run `scons platform=[your_os]` again. (If you haven't closed your terminal since the last time you ran this command, you may be able to access this line by pressing your Up Arrow key.) You should again see `scons: done building targets.` once the compilation process completes.
 
@@ -336,9 +343,11 @@ Here's what the Ground should look like at this point:
 
     (It is *not* necessary to add in this code for all properties of a class. However, they're very important for certain items, such as signals--which we'll get to later.)
 
-1. This new code should compile at this point; however, if we tried to do so, we most likely wouldn't be able to locate a Mnchar class within our editor. That's because we also need to update register_types.cpp with information about this class. Fortunately, this is easy to do so. Right under `#include "main.h"`, add `#include "mnchar.h"`. Next, right under `GDREGISTER_CLASS(Main);`, add `GDREGISTER_CLASS(Mnchar);`. 
+1. This new code should compile at this point; however, if we tried to do so, we most likely wouldn't be able to locate a Mnchar class within our editor. That's because we also need to update register_types.cpp with information about this class. Fortunately, this is easy to do so. Right under `#include "main.h"`, add `#include "mnchar.h"`. Next, right under `GDREGISTER_RUNTIME_CLASS(Main);`, add `GDREGISTER_RUNTIME_CLASS(Mnchar);`. 
 
 1. *Now* run `scons platform=[your_os]` to compile this new Mnchar-related code. In my case, the editor still didn't show the Mnchar class within the 'Create New Node' menu after this step, but it did present it once I closed and relaunched my editor. Thus, I'd recommend that you do the same at this point.
+
+## Part 5: Setting up mnchar.tscn
 
 1. Back in the editor, create a new scene. Click the 'Other Node' button under the 'Create Root Node:' prompt; search for 'Mnchar'; then double-click it. Next, save this scene as mnchar.tscn.
 
@@ -348,16 +357,186 @@ Here's what the Ground should look like at this point:
 
     (I have found, however, that this property will sometimes disappear from the editor after compiling my code. This might be caused by an issue with my current setup, but it might also be a glitch within the editor itself. Closing, then relaunching the editor always seems to resolve this issue, thankfully.)
 
+1. Add a Node3D as a child of Mnchar and rename it 'Pivot'. In many cases, we'll apply movement and rotation actions to this node rather than to Mnchar itself. Next, add a MeshInstance as a child of Pivot; name it 'Body'; click the 'empty' text within its Mesh section in the Inspector; and select a BoxMesh. Next, click the downwards-pointing arrow to the right of the gray cube in the Inspector and select Edit. (Reference 5)
 
-[Here with editing. Next, configure the Mnchar's shape and add in movement code. Then configure your start function and add in code that will place a single Mnchar within the game area. (You can later update this code to add in two characters, and then the number specified within your Hud class.)]
+1. Within the Size section of the edit menu, change the x, y, and z values from 1.0 to 2.0. Next, go down to the Material section and select a new StandardMaterial 3D. Unlike with the game area, we won't choose a color for this material just yet--as we'll actually use C++ to update this color instead. (This will make it easier to assign different colors to different Mnchar instances.) 
 
+1. We'll also want to create a turret for our player. Create a new MeshInstance3D child of Pivot; name it 'Turret'; assign it a new BoxMesh; go into that mesh's edit menu; change the x, y, and z sizes to 0.5, 0.5, and 0.5; and give it a new StandardMaterial3D. 
+
+1. Next, navigate back to the Turret's main Inspector menu. (You can do so a few different ways; one of which is to select the Body, then the Turret again.) Within the Node3D section, set the z transform to 1.25 meters. That way, the turret will be adjacent to the forward face of the Pivot.
+
+1. Add a CollisionShape3D as a child of *Mnchar* (not Pivot). Click on the 'empty' text within the Shape section of the Inspector; add in a BoxShape3D; click the downwards arrow to the right of 'BoxShape3D'; and select 'Edit.' Change the x, y, and z Size values to 2.0 in order to make it the exact same size as the Body component. 
+
+    (You could also update these Size values, along with the transform of the CollisionShape, to allow it to fit over both the Body and Turret objects; alternatively, you could create a separate CollisionShape3D for the Turret. That would prevent the Turret from being able to enter into other objects. But this simpler approach will suffice for this tutorial.) (Reference 5)
+
+    Once you're finished with these updates, go ahead and save the scene.
+
+1. In order to move the Mnchar with a controller (or, for development purposes, a keyboard), we'll need to add input actions to our game's Input Map. Navigate to this map by clicking Project in the top left of the Godot editor window, then selecting Project Settings; the Input Map should be the second tab from the left. (Reference 5)
+
+1. For now, we'll just add in keyboard entries; once we're further in the development process, we'll add in controller entries also. Click on the 'Add New Action' text within the Input Map menu; type move_left_0; and hit the '+ Add' button to the right of this window. Next, click the + sign to the right of the new 'move_left_0' entry that has appeared; and hit your J key (or, if you're using a different layout like I am, where the J key would be on a QWERTY keyboard).
+
+    (You're welcome to use a key other than J, such as Left Arrow, if you'd like. The use of 'J' will make more sense in the context of all the keys we'll be adding in.)
+
+    ![](/tutorial_screenshots/first_input_map_entry.png)
+
+1. Perform the same steps for the following action names and keys:
+
+    1. move_right_0 (L key)
+    1. move_forward_0 (I key)
+    1. move_back_0 (K key)
+    1. rotate_left_0 (S key)
+    1. rotate_right_0 (F key)
+    1. fire_0 (Space Bar)
+    1. reset_0 (O key)
+
+1. Once you've finished this process, your input map should look like the following:
+
+    ![](/tutorial_screenshots/player_0_keyboard_input_map.png)
+
+    By the way, the reason for adding '_0' to the end of these actions is to allow different sets of controls to be distinguished for different players later on.
+
+    Close out of the input map and save your mnchar.tscn file.
+
+## Part 6: Moving the Mnchar
+
+1. We're almost ready to add in code that will let us move our Mnchar around the game area. First, though, we need to *add* the Mnchar to the game area.
+
+1. One option would be to instantiate a Mnchar as a child scene of main.tscn (Reference 4). However, since we're creating a multiplayer game whose player count might change from round to round, it will be more ideal to add Mnchars to this scene via code. (That way, a specific number of Mnchars can be placed within the game area depending on how many players choose to enter a given game.) The following steps will allow us to add a Mnchar to the scene using C++.
+
+1. Within main.h, add the following code right above `protected:`
+
+    ```
+    private:
+        Ref<PackedScene> mnchar_scene;
+    ```
+
+    Next, add the following right below `~Main();`
+
+    ```
+    Ref<PackedScene> get_mnchar_scene();
+    void set_mnchar_scene(Ref<PackedScene>);
+    ```
+
+    (Reference 8)
+
+    Finally, after `#include <godot_cpp/variant/utility_functions.hpp>` , add:
+
+    ```
+    #include <godot_cpp/classes/packed_scene.hpp>
+    #include "mnchar.h"
+    ```
+
+1. Next, within main.cpp, add the following code within `Main::_bind_methods():`
+
+    ```
+      ClassDB::bind_method(D_METHOD("get_mnchar_scene"), &Main::get_mnchar_scene);
+  ClassDB::bind_method(D_METHOD("set_mnchar_scene", "mnchar_scene"),
+                       &Main::set_mnchar_scene);
+
+  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
+                            PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
+               "set_mnchar_scene", "get_mnchar_scene");
+    ```
+
+    (Reference 8)
+
+1. In addition, add the following code below `Main::~Main() {}`:
+
+    ```
+    Ref<PackedScene> Main::get_mnchar_scene() { return mnchar_scene; }
+
+    void Main::set_mnchar_scene(Ref<PackedScene> packed_scene) {
+    mnchar_scene = packed_scene;
+    }
+    ```
+
+    (Reference 8)
+
+
+    We're defining a scene (`mnchar_scene`) that we'll be able to access within main.cpp. Adding it as a property (like we did with movement_speed) will allow us to specify, within the editor, the exact scene (in this case, mnchar.tscn) that we want Godot to interpret as `mnchar_scene`.
+
+1. Next, add the following to the bottom of `Main::_ready()`:
+
+    ```
+    auto new_mnchar =
+        reinterpret_cast<Mnchar *>(get_mnchar_scene()->instantiate());
+    
+    add_child(new_mnchar);
+    ```
+
+    (Reference 8)
+
+    This code retrieves our mnchar_scene; reinterprets it as a Mnchar object; and then adds it to our scene tree.
+
+
+1. Note: When I was putting this code together, I initially forgot to define `get_mnchar_scene()` and `set_mnchar_scene()` within main.cpp. Although my code compiled successfully, these omissions caused Godot to fail to locate both my Main and Mnchar classes within the editor:
+
+    ![](/tutorial_screenshots/red_xs_due_to_missing_functions.png)
+
+    (I knew this was the cause because I've made similar mistakes more often than I'd like to admit!)
+
+    Adding these functions in, then closing and relaunching the editor resolved this issue.
+
+1. Go ahead and compile your code, then relaunch the editor. After you open main.tscn and click on the Main node within your scene tree, you should now see a new Packed Scene entry right below Main in the inspector. Click the 'empty' text; select 'Load'; and then choose your mnchar.tscn scene. 
+
+1. When you try playing your project, you should now see a little gray box (your Mnchar) in the middle of your game area:
+
+    ![](/tutorial_screenshots/mnchar_added_via_code.png)
+
+
+1. You'll notice, though, that the main character is partially sunk in the ground. We could fix this by changing its transform within Mnchar.tscn; however, because we'll need to be able to move Mnchars around later on when setting up multiplayer games, we may as well add some initial movement code now.
+
+    Declare a new `start()` function for the Mnchar class by adding the following code right before the final closing bracket of mnchar.h:
+
+    ```
+    void start(Vector3 mnchar_translate_arg);
+    ```
+
+    Next, add the following code to the bottom of mnchar.cpp:
+
+    ```
+    void Mnchar::start(Vector3 mnchar_translate_arg)
+    {translate(mnchar_translate_arg);}
+    ```
+
+    This function will ultimately allow us to configure each player's starting color, location, rotation, and ID. For now, though, we'll just use it to move our player to a better starting location.
+
+    (Resource 8)
+
+1. Within Main::_ready(), add the following code right above `add_child(new_mnchar)`:
+
+    ```
+    new_mnchar -> start(Vector3(15, 1, -20));
+    ```
+
+    This will move the Mnchar 15 meters to the left, one meter up (to make its bottom level with the ground), and 20 meters closer to the camera. We'll add in code later to give other Mnchars different starting locations, but all of them will also get moved up one meter.
+
+    (Resource 8)
+
+    Note: I had originally tried this code:
+
+    `get_node<Node3D>("Pivot") -> translate(translate_val);`
+
+    However, this caused issues when multiple characters were added to the scene--possibly because the transforms of the actual Mnchar class weren't getting changed and were thus overlapping with one another. (This caused them to shoot up in the sky, which was both frustrating and hilarious!)
+
+1. Compile your code, then rerun your main scene. You should now see the full Mnchar closer to the bottom left of the window:
+
+    ![](/tutorial_screenshots/repositioned_mnchar.png)
+
+# Here with editing:
+
+Next, work on adding in movement code for this character. Also consider assigning an ID of 0 and incorporating that into the code--or, alternatively, incorporate that step later.
 
 
 ## References
 
-Note: In some cases, a reference within this list was itself based heavily (or even entirely) on another reference. However, in order to keep this list simple and manageable, I won't include such details. You can find more information about the sources used for these references within their own repositories.
+Notes: 
 
-In addition, references that begin with '/godot-cpp' refer to a file within a *compiled* godot-cpp repository. (See Part 1 for more details on (1) how to access and compile this repository and (2) the exact version I'm using.)
+* In some cases, a reference within this list was itself based heavily (or even entirely) on another reference. However, in order to keep this list simple and manageable, I won't include such details. You can find more information about the sources used for these references within their own repositories.
+
+* In addition, references that begin with '/godot-cpp' refer to a file within a *compiled* godot-cpp repository. (See Part 1 for more details on (1) how to access and compile this repository and (2) the exact version I'm using.)
+
+* Not all references are listed within every paragraph. For instance, if multiple paragraphs in a row use the same reference, I might only cite that reference within some of those paragraphs.
 
 * Reference 1: https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html
 
@@ -374,3 +553,16 @@ In addition, references that begin with '/godot-cpp' refer to a file within a *c
 * Reference 6: /godot-cpp/gen/src/classes/character_body3d.cpp
 
 * Reference 7: /godot-cpp/gen/include/godot_cpp/classes/character_body3d.hpp
+
+* Reference 8: https://github.com/kburchfiel/cpp_yf2dg_gd_4pt_6
+
+
+    Notes: 
+    
+    * The vast majority of the code in this repository came from https://github.com/j-dax/gd-cpp , which was released under the BSD-3-Clause license by Matthew Piazza. My repository simply converted that code into a step-by-step guide (similar to this one one).
+
+    * In order to simplify this reference list, I won't link to all of the individual source files that I consulted. However, I recommend checking player.cpp and player.h for the Mnchar class's code; main.cpp and main.h for the Main class's code; and hud.cpp and hud.h for the Hud class's code. (These source files are available within https://github.com/kburchfiel/cpp_yf2dg_gd_4pt_6/tree/main/src .)
+
+* Reference 9: https://godotengine.org/releases/4.3/#gdextension-runtime-class-registration
+
+* Reference 10: https://forum.godotengine.org/t/gdextension-register-runtime-class/77868/4?u=kburchfiel
