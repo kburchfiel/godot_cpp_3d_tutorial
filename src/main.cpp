@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #include "main.h"
 
 void Main::_bind_methods() {
@@ -27,8 +29,7 @@ void Main::_ready() {
     auto new_mnchar = reinterpret_cast<Mnchar *>(
         get_mnchar_scene()->instantiate());
     
-    new_mnchar -> start(Vector3(15, 1, -20));
-
+    new_mnchar -> start("0", Vector3(15, 1, -20));
     add_child(new_mnchar);
 
 }

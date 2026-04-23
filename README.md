@@ -280,6 +280,7 @@ Here's what the Ground should look like at this point:
 
     private:
     double movement_speed = 14;
+    double rotation_speed = 0.15;
     
     protected:
     static void _bind_methods();
@@ -291,13 +292,16 @@ Here's what the Ground should look like at this point:
     void set_movement_speed(const double movement_speed);
     double get_movement_speed() const;
 
+    void set_rotation_speed(const double rotation_speed);
+    double get_rotation_speed() const;
+
 
     };
     ```
 
     (Source: References 1, 2, and 4)
 
-    This code is very similar to that found within main.h. One new addition of note is `movement_speed`, a double that controls the Mnchar's movement speed in meters per second, along with its corresponding setter and getter functions. We'll make it possible to update this value within the editor. 
+    This code is very similar to that found within main.h. Two new additions of note are `movement_speed` and `rotation_speed` along with their corresponding setter and getter functions. We'll make it possible to update both of these values within the editor. 
 
     Also note that, because Mnchar will extend CharacterBody3D, we need to include its header file within this source file. (I chose to use CharacterBody3D as my player's class because the Your First 3D Game tutorial uses this same class; see Reference 5. Code for the CharacterBody3D class itself can be found in References 6 and 7.
 
@@ -317,6 +321,13 @@ Here's what the Ground should look like at this point:
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "movement_speed"),
                 "set_movement_speed", "get_movement_speed");
 
+    ClassDB::bind_method(D_METHOD("get_rotation_speed"),
+                        &Mnchar::get_rotation_speed);
+    ClassDB::bind_method(D_METHOD("set_rotation_speed", "p_rotation_speed"),
+                        &Mnchar::set_rotation_speed);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "rotation_speed"),
+                "set_rotation_speed", "get_rotation_speed");
+
     }
 
     Mnchar::Mnchar() {}
@@ -331,17 +342,27 @@ Here's what the Ground should look like at this point:
 
     double Mnchar::get_movement_speed() const { return movement_speed; }
 
+void Mnchar::set_rotation_speed(const double p_rotation_speed) {
+  rotation_speed = p_rotation_speed;
+}
+
+double Mnchar::get_rotation_speed() const { return rotation_speed; }
+
+
     ```
 
     (Source: References 1 and 2)
 
     This code, like that in main.h, is quite barebones; our priority is simply to add in a class that the Godot editor will recognize. Once we create and configure a Mnchar scene within the editor, we'll then come back and extend this code. 
 
-    However, I did also add in code that will allow us to modify the movement speed within the editor. This isn't a crucial part of this particular game, but it *will* allow you to test out different movement speeds without having to recompile the code--not that that's a huge hurdle.
+    However, I did also add in code that will allow us to modify the movement and rotation speeds within the editor. This isn't a crucial part of this particular game, but it *will* allow you to test out different movement and rotation values without having to recompile the code--not that that's a huge hurdle.
 
-    This speed-adjustment code consists of two functions (`set_movement_speed()` and `get_movement_speed()`) that let us specify and retrieve, respectively, the player's speed. Both of these functions (including the former's `p_movement_speed` argument) have corresponding bind_method() calls within `_bind_methods()`. In addition, we have an ADD_PROPERTY() call that tells the editor about the `movement_speed` variable along with its setter and getter functions. (These are all based on the `amplitude` property within the GDExample class in Reference 1.)
+    The speed-adjustment code consists of two functions (`set_movement_speed()` and `get_movement_speed()`) that let us specify and retrieve, respectively, the player's speed. Both of these functions (including the former's `p_movement_speed` argument) have corresponding bind_method() calls within `_bind_methods()`. In addition, we have an ADD_PROPERTY() call that tells the editor about the `movement_speed` variable along with its setter and getter functions. (These are all based on the `amplitude` property within the GDExample class in Reference 1.) 
+    
+    The rotation-adjustment code is very similar. I simply copied and pasted my relevant movement-adjustment code, then replaced all cases of 'movement' with 'rotation.' 
 
-    (It is *not* necessary to add in this code for all properties of a class. However, they're very important for certain items, such as signals--which we'll get to later.)
+    (It is *not* necessary to add in `bind_method()` and `ADD_PROPERTY()` calls like this for every attribute of a class. However, they're very important for certain items, such as signals--which we'll get to later.)
+
 
 1. This new code should compile at this point; however, if we tried to do so, we most likely wouldn't be able to locate a Mnchar class within our editor. That's because we also need to update register_types.cpp with information about this class. Fortunately, this is easy to do so. Right under `#include "main.h"`, add `#include "mnchar.h"`. Next, right under `GDREGISTER_RUNTIME_CLASS(Main);`, add `GDREGISTER_RUNTIME_CLASS(Mnchar);`. 
 
@@ -397,7 +418,7 @@ Here's what the Ground should look like at this point:
 
     Close out of the input map and save your mnchar.tscn file.
 
-## Part 6: Moving the Mnchar
+## Part 6: Adding a Mnchar to the game area
 
 1. We're almost ready to add in code that will let us move our Mnchar around the game area. First, though, we need to *add* the Mnchar to the game area.
 
@@ -477,6 +498,10 @@ Here's what the Ground should look like at this point:
 
     Adding these functions in, then closing and relaunching the editor resolved this issue.
 
+    I actually managed to make a similar mistake later on for `get_rotation_speed()` and `set_rotation_speed()`. Error messages within the console helped me figure out the issue. (Note the `get_rotation_speed` reference within the third-to-last error.)
+
+    ![](/tutorial_screenshots/scary_but_helpful_error_messages.png)
+
 1. Go ahead and compile your code, then relaunch the editor. After you open main.tscn and click on the Main node within your scene tree, you should now see a new Packed Scene entry right below Main in the inspector. Click the 'empty' text; select 'Load'; and then choose your mnchar.tscn scene. 
 
 1. When you try playing your project, you should now see a little gray box (your Mnchar) in the middle of your game area:
@@ -523,9 +548,185 @@ Here's what the Ground should look like at this point:
 
     ![](/tutorial_screenshots/repositioned_mnchar.png)
 
+## Part 7: Moving the Mnchar
+
+1. Because we're creating a multiplayer game, we'll want to set up our movement code in a way that allows each player to move his or her own Mnchar (and no one else's). The approach we'll take for this task will be as follows:
+
+    1. We'll first create a new String variable (`mnchar_id`) that will store a unique ID for each Mnchar. (These IDs will range from "0" to "7" in order to support up to eight different players.) This variable will also be useful for setting character-specific locations, rotations, and colors.
+    
+    1. We'll also add each of these same IDs to the end of all action names within one particular group of movement commands that we'll create. Thus, one group's action names will end in "0", others will end in "1", and so forth. (This is why we added "_0" to our first set of movement names.) We'll also specify that each set of commands will only work for one particular device. (The device IDs recognized by Godot range from 0 through 7, thus matching our own list of possible IDs.)
+
+    1. In our movement code, we'll check for movements that match the given Mnchar's ID. For instance, here's what our left/right movement code will look like:
+
+        ```
+        x_direction = input->get_axis("move_left_"+mnchar_id, 
+        "move_right_"+mnchar_id);
+        ```
+    1. In summary, by having Mnchar IDs match movement-name suffixes, and by having all movements for a particular suffix match only one particular device, we can create a functioning multiplayer control setup without too much extra work. (This approach was based on references 11 through 15.) 
+
+1. The first step here will be to add a `mnchar_id` value to our Mnchar class. Under `double movement_speed = 14;` within the `private:` section of Mnchar.h, add:
+
+    ```
+    String mnchar_id = "";
+    ```
+
+    Next, in the `public:` section, add the following setter and getter function declarations under your `get_movement_speed()` function declaration:
+
+    ```
+    void set_mnchar_id(const String mnchar_id);
+    String get_mnchar_id() const;
+    ```
+
+    Finally, add a `mnchar_id_arg` argument before your `mnchar_translate_arg` within `start()` so that the declaration matches the following line:
+
+    ```
+    void start(String mnchar_id_arg, Vector3 mnchar_translate_arg);
+    ```
+
+1. Within mnchar.cpp, add the following below your `get_movement_speed()` function definition:
+
+    ```
+    void Mnchar::set_mnchar_id(const String p_mnchar_id) {
+    mnchar_id = p_mnchar_id;
+    }
+
+    String Mnchar::get_mnchar_id() const { return mnchar_id;}
+    ```
+
+    Next, add `String mnchar_id_arg` before `Vector3 mnchar_translate_arg` within the arguments in this file's `Mnchar::start()` function definition. In addition, right before `translate(mnchar_translate_arg);` in the function body, add: `set_mnchar_id(mnchar_id_arg);`.
+
+1. Finally, within main.cpp, update your `new_mnchar -> start()` command within `Main::_ready()` so that it reads as follows:
+
+    ```
+    new_mnchar -> start("0", Vector3(15, 1, -20));
+    ```
+
+    (This will assign `new_mnchar` an ID of 0, thus allowing all movement commands ending in "0" to get registered by this Mnchar.)
+
+    If you want to confirm that this change has taken effect, you can also add the following code following `set_mnchar_id(mnchar_id_arg)` within `Mnchar::start()`:
+
+    ```
+    UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
+    ```
+
+    (Printing out values is incredibly helpful for debugging work.)
+
+    We could also have added `bind_method()` and `ADD_PROPERTY()` calls for our `mnchar_id` value and its corresponding setter and getter functions (as we did with the `movement_speed` variable). However, that won't be necessary in this case, as we won't need to access or modify those values directly within the editor.
+
+1. Now that we have code in place for assigning `mnchar_id`s, we can utilize that ID within our input code. First, add the following code after your `start()` function declaration within mnchar.h:
+
+    ```
+    void _physics_process(double delta) override;
+    ```
+
+    (See Reference 4 for the use of `_physics_process` here rather than `_process`.)
+
+    In addition, add the following three include statements after `#include <godot_cpp/variant/utility_functions.hpp>`:
+
+    ```
+    #include <godot_cpp/classes/input.hpp>
+    #include <godot_cpp/classes/input_event.hpp>
+    #include <godot_cpp/classes/input_map.hpp>
+    ```
+
+1. Next, add the following code to the end of mnchar.cpp. We'll start each `_physics_process` call by retrieving input data that we can then parse. (The lack of a closing bracket is intentional, since we'll be filling out the rest of this function below.)
+
+    ```
+    void Mnchar::_physics_process(double delta) {
+
+    auto input = Input::get_singleton();
+
+    ```
+
+    (Reference 4)
+
+1.  Extend this function by adding the following code, which uses our left, right, forward, and back movements to determine the player's movement along the x (left/right) and z (forward/back) axes. This approach will allow different movement speeds depending on exactly how far a controller joystick is moved down, but it also works fine for keyboard input.
+
+    (Note: I've found that I sometimes need to put 'move_right' before 'move_left', and 'move_forward' before 'move_back', in order to get my movement code to work correctly.)
+
+    ```
+    float x_direction =
+        input->get_axis("move_left_" + mnchar_id, "move_right_" + mnchar_id);
+    float z_direction =
+        input->get_axis("move_forward_" + mnchar_id, "move_back_" + mnchar_id);
+    ```
+    Also note the inclusion of mnchar_id, which I discussed at length earlier.
+
+    (References 16 and 17)
+
+1. Next, we'll rotate the player in response to any rotation commands sent by the player's controller (or, if `mnchar_id` is 0, the keyboard). Add the following code to the end of the function:
+
+    ```
+    get_node<Node3D>("Pivot")->rotate_object_local(
+        Vector3(0, 1, 0),
+        rotation_speed * input->get_axis("rotate_right_" + mnchar_id,
+                                        "rotate_left_" + mnchar_id));
+    ```
+
+    (References 16, 18, and 19)
+
+1. We'll now retrieve information about the Mnchar's basis that we'll use to update its velocity. Add the following code to the end of `_physics_process()`:
+
+    Note: I'm not sure why, but multiplying the x and z components
+  of the x and z bases, respectively, by -1 was critical for getting
+  the movement code to work. This may be due to an issue with my setup. I imagine that there's a way to update my code such that at least one of these multiplication commands won't be necessary.
+
+    ```
+    auto player_transform_basis_z =
+        get_node<Node3D>("Pivot")->get_transform().get_basis()[2];
+
+    auto player_transform_basis_x =
+        get_node<Node3D>("Pivot")->get_transform().get_basis()[0];
+
+    player_transform_basis_x.x *= -1;
+
+    player_transform_basis_z.z *= -1;
+    ```
+
+1. Extend the function by adding the following code, which initializes, then updates, the player's target velocity.
+
+    ```
+    Vector3 target_velocity = Vector3(0, 0, 0);
+
+    float abs_z_direction = std::abs(z_direction);
+    float abs_x_direction = std::abs(x_direction);
+
+    if (abs_z_direction >= abs_x_direction) {
+        target_velocity +=
+            -1 * player_transform_basis_z * z_direction * movement_speed;
+    } else {
+        target_velocity +=
+            -1 * player_transform_basis_x * x_direction * movement_speed;
+    }
+    ```
+
+    I would like Mnchar to be able to move *only* forward, back, left, or right relative to its current position (i.e. not diagonally). Therefore, the code above finds the absolute value of the x and z directions, then moves the player along the axis with the greatest absolute value. This isn't strictly necessary, but I find it makes the Mnchar's movement somewhat more intuitive.
+
+
+    (Note that I'm using the standard library's abs() function rather than Godot's, as the latter appeared to truncate values down to the nearest int.)
+
+
+    (References 4, 17, 20, and 21)
+
+1.  Finally, close out this function with the following code:
+    ```
+    set_velocity(target_velocity);
+
+    move_and_slide();
+    }
+    ```
+
+    (References 4 and 21)
+
+
+1. Reopen your editor, launch the scene, and test out the controls. Make sure that no directions are the inverse of what you'd expect--and that the player cannot move diagonally.
+
+    By the way: if the game crashes right when you launch it, make sure that your mnchar.tscn scene is still present within Main's Packed Scene attribute. (It sometimes disappears on my end, but thankfully, it's easy to add back in.)
+
+
 # Here with editing:
 
-Next, work on adding in movement code for this character. Also consider assigning an ID of 0 and incorporating that into the code--or, alternatively, incorporate that step later.
+Next, add in projectile-launch code (which will first involve creating a projectile), followed by code that allows the player to respond to being hit by a projectile (which will involve adding in a projectile detector).
 
 
 ## References
@@ -563,3 +764,25 @@ Notes:
 * Reference 9: https://godotengine.org/releases/4.3/#gdextension-runtime-class-registration
 
 * Reference 10: https://forum.godotengine.org/t/gdextension-register-runtime-class/77868/4?u=kburchfiel
+
+* Reference 11: https://www.reddit.com/r/godot/comments/13ikz4u/best_way_to_handle_controller_input_for_local/
+
+* Reference 12: https://github.com/remram44/godot-multiplayer-example
+
+* Reference 13: https://www.gdquest.com/library/split_screen_coop/
+
+* Reference 14: https://godotassetlibrary.com/asset/QdddqG/multiplayer-input
+
+* Reference 15: https://kidscancode.org/godot_recipes/3.x/2d/splitscreen_demo/index.html
+
+* Reference 16: https://docs.godotengine.org/en/stable/tutorials/2d/2d_movement.html
+
+* Reference 17: https://github.com/godotrecipes/characterbody3d_examples/blob/master/mini_tank.gd
+
+* Reference 18: https://docs.godotengine.org/en/stable/tutorials/3d/using_transforms.html
+
+* Reference 19: /godot-cpp/gen/src/classes/node3d.cpp
+
+* Reference 20: /godot-cpp/src/variant/vector3.cpp
+
+* Reference 21: /godot-cpp/include/godot_cpp/variant/vector3.hpp

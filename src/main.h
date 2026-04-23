@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #pragma once
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
