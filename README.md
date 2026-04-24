@@ -246,9 +246,9 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Let's change the drab, white color of the Ground to something more interesting. Select your MeshInstance3D in the scene tree, then click the downwards-facing arrow to the right of the Mesh (and its corresponding gray cube) in the Inspector and select 'Edit.' Within the Material section, create a new StandardMaterial3D, then click the downwards arrow to the right of the white sphere that appears and select Edit. Click on the Albedo section, then select a color of your choice. 
 
-Here's what the Ground should look like at this point:
+    Here's what the Ground should look like at this point:
 
-![](/tutorial_screenshots/ground.png)
+    ![](/tutorial_screenshots/ground.png)
 
 1. Before we can get to the 'action' part of this scene, we'll need lights and a camera. Add a DirectionalLight3D as a child of Main, then set its y transform to 20.0. (The x and z transforms can stay at 0.0.) Change its x rotation to -90, or whatever allows the light to point directly down at the ground. (You'll know it's working when you see the ground brighten up.) Check the Shadow box within the Light3D section of the Inspector as well.
 
@@ -256,7 +256,7 @@ Here's what the Ground should look like at this point:
 
 1. Try running the scene again. You should now see your game area within the window that appears:
 
-![](/tutorial_screenshots/game_area.png)
+    ![](/tutorial_screenshots/game_area.png)
 
 
 1. Now that we have a game scene in place, this will be a good time to begin work on our Mnchar (main character) class. There's plenty more C++ code that will get added to main.cpp and main.h, but those additions will be easier to implement and debug once we have actual characters and projectiles to manage.
@@ -342,13 +342,11 @@ Here's what the Ground should look like at this point:
 
     double Mnchar::get_movement_speed() const { return movement_speed; }
 
-void Mnchar::set_rotation_speed(const double p_rotation_speed) {
-  rotation_speed = p_rotation_speed;
-}
+    void Mnchar::set_rotation_speed(const double p_rotation_speed) {
+    rotation_speed = p_rotation_speed;
+    }
 
-double Mnchar::get_rotation_speed() const { return rotation_speed; }
-
-
+    double Mnchar::get_rotation_speed() const { return rotation_speed; }
     ```
 
     (Source: References 1 and 2)
@@ -723,10 +721,242 @@ double Mnchar::get_rotation_speed() const { return rotation_speed; }
 
     By the way: if the game crashes right when you launch it, make sure that your mnchar.tscn scene is still present within Main's Packed Scene attribute. (It sometimes disappears on my end, but thankfully, it's easy to add back in.)
 
+## Part 8: Creating a projectile
+
+1. It's neat to move our Mnchar around with code, but the game won't be too much fun without anything for it to fire (or be hit by). Therefore, let's go ahead and add a Projectile class to our game. This class will have many similarities to the Mnchar class (on which its code will be based). 
+
+1. Within your src/ folder, create two new files, 'projectile.h' and 'projectile.cpp'. Add the following text to projectile.h:
+
+    ```
+    #pragma once
+
+    #include <godot_cpp/classes/character_body3d.hpp>
+    #include <godot_cpp/core/class_db.hpp>
+    #include <godot_cpp/variant/utility_functions.hpp>
+
+    using namespace godot;
+
+    class Projectile : public CharacterBody3D {
+    GDCLASS(Projectile, CharacterBody3D)
+
+    private:
+    double projectile_speed = 64;
+    double active_time = 0;
+    String firing_mnchar_id = "";
+    Vector3 projectile_velocity = Vector3(0, 0, 0);
+
+    protected:
+    static void _bind_methods();
+
+    public:
+    Projectile();
+    ~Projectile();
+
+    void set_projectile_speed(const double movement_speed);
+    double get_projectile_speed() const;
+
+    void set_firing_mnchar_id(const String firing_mnchar_id_arg);
+    String get_firing_mnchar_id() const;
+
+    void start(Transform3D transform, String firing_mnchar_id);
+    void _physics_process(double delta) override;
+    };
+
+    ```
+
+    `active_time` will store how long a projectile has been active, thus allowing us to remove it from the scene after a certain amount of time has passed. This prevents projectiles from existing in the game's memory forever, which would prove to be inefficient. (Reference 22)
+
+    `firing_mnchar_id` will let us determine which Mnchar fired a projectile--and, thus, which Mnchar should be credited for a hit on another Mnchar. We won't use this variable for a little while, but it doesn't hurt to add it in now. 
+
+1. Next, add the following code to projectile.cpp:
+
+    ```
+
+    #include "projectile.h"
+
+    using namespace godot;
+
+    void Projectile::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("get_projectile_speed"),
+                        &Projectile::get_projectile_speed);
+    ClassDB::bind_method(D_METHOD("set_projectile_speed", "p_projectile_speed"),
+                        &Projectile::set_projectile_speed);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "projectile_speed"),
+                "set_projectile_speed", "get_projectile_speed");
+    }
+
+    Projectile::Projectile() {}
+
+    Projectile::~Projectile() {}
+
+    void Projectile::set_projectile_speed(const double p_projectile_speed) {
+    projectile_speed = p_projectile_speed;
+    }
+
+    double Projectile::get_projectile_speed() const { return projectile_speed; }
+
+    void Projectile::set_firing_mnchar_id(const String firing_mnchar_id_arg) {
+    firing_mnchar_id = firing_mnchar_id_arg;
+    }
+
+    String Projectile::get_firing_mnchar_id() const { return firing_mnchar_id; }
+    ```
+
+    This is all fairly similar to what we've added within mnchar.cpp.
+
+1. Add the following code right below your existing projectile.cpp code:
+
+    ```
+    void Projectile::start(Transform3D transform, String firing_mnchar_id) {
+
+    set_firing_mnchar_id(firing_mnchar_id);
+
+    set_transform(transform);
+
+    auto projectile_basis_z = Projectile::get_transform().get_basis()[2];
+
+    projectile_basis_z.z *= -1;
+
+    projectile_velocity = -1 * projectile_basis_z * projectile_speed;
+    }
+    ```
+
+    This code will allow us to configure a new Projectile that a Mnchar has just fired. In conjunction with an upcoming update to mnchar.cpp, it will set the Projectile's  `firing_mnchar_id` with that Mnchar's `mnchar_id`; set the Projectile's transform based on that Mnchar's transform; and initialize the projectile's velocity. (This velocity code is quite similar to that found within `Mnchar::_process()`. One difference is that we don't need to calculate and then incorporate x_direction and z_direction values; the z direction will always be 1, and the x direction will always be 0.
+
+    (Based on references 18, 23, 24, 27, and 28. References 25 and 26 are also helpful for projectile-related code.)
+
+1. Finally, add the following code to the bottom of projectile.cpp:
+
+    ```
+    void Projectile::_physics_process(double delta) {
+    auto collision = move_and_collide(projectile_velocity * delta);
+    if (active_time >= 2) {
+        queue_free();
+    }
+    active_time += delta;
+    }
+    ```
+
+    The queue_free() command removes this particular projectile from the game, which we'll want to do after a certain amount of time (in this case, two seconds) has elapsed. It would be ideal to make this time contingent on the size of the game area (which probably won't change very much) and the projectile's movement speed, but this simpler apporach will work OK for now.
+
+    (Based on references 8 and 23)
+
+1. As always, before we can incorporate this class into our game, we'll need to add references for it within register_types.cpp. Within that script, add `#include "projectile.h"` below `#include "mnchar.h"`, and `GDREGISTER_RUNTIME_CLASS(Projectile);` below `GDREGISTER_RUNTIME_CLASS(Mnchar);`.
+
+1. We'l have more to add to our Projectile class's code later on, but what we have so far will at least let us create a Projectile scene within our editor. Go ahead and compile your code, then restart your editor.
+
+## Part 9: Adding a projectile scene
+
+1. Select Scene --> New Scene; click 'Other Node' under the 'Create Root Node:' text; and search for your new Projectile class. Once you've found it, select it and hit 'Create.' Go ahead and save this near-empty scene as projectile.tscn.
+
+1. Just as our Projectile code was based on our Mnchar code, our Projectile scene will have many similarities to our Mnchar scene. As you did within mnchar.tscn, add a Node3D as a child of your Projectile and rename it 'Pivot.' Then add a MeshInstance3D as a child of this Pivot; rename it 'Body'; and assign it a BoxMesh within the MeshInstance3D section of the Inspector. Within the edit menu for this BoxMesh, create a new StandardMaterial3D for it, then set both its x and y Size values equal to 0.25. (Leave the z value unchanged at 1.) (Refer to the 'Adding a Mnchar to the game area' section of the tutorial if you've forgotten how to perform any of these steps.)
+
+1. Finally, add a CollisionShape3D as a child of Projectile; assign it a BoxShape3D; and set this shape's x, y, and z values to 0.25, 0.25, and 1, respectively. (Again, refer to the 'Adding a Mnchar to the game area' section if needed.)
+
+![](/tutorial_screenshots/projectile_scene.png)
+
+    ## Part 10: Allowing Mnchars to fire projectiles
+
+1. Next, we'll need to add code for firing projectiles to our Mnchar class. First, within mnchar.h, add the following two lines to the end of your list of `#include` statements:
+
+    ```
+    #include <godot_cpp/classes/packed_scene.hpp>
+    #include "projectile.h"
+    ```
+
+1. Next, add `void shoot_projectile();` right above `void _physics_process(double delta) override;`. Then add `Ref<PackedScene> projectile_scene;` at the end of your `private:` section (right after `String mnchar_id = "";`). Finally, add the following code rigth before `shoot_projectile()` within the `public` section of this file:
+
+    ```
+    Ref<PackedScene> get_projectile_scene();
+    void set_projectile_scene(Ref<PackedScene>);
+    ```
+
+    This code will ultimately allow us to access the Projectile scene within our Mnchar class. It's very similar to the code we're using to access Mnchars themselves within the Main class.
+
+1. Within mnchar.cpp, add the following code to the end of `Mnchar::_bind_methods()` so that we can access this `projectile_scene` variable within the editor (and thus link projectile.tscn to it):
+
+    ```
+    ClassDB::bind_method(D_METHOD("get_projectile_scene"),
+                        &Mnchar::get_projectile_scene);
+    ClassDB::bind_method(D_METHOD("set_projectile_scene", "projectile_scene"),
+                        &Mnchar::set_projectile_scene);
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
+                                PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
+                "set_projectile_scene", "get_projectile_scene");
+    ```
+
+1. Next, right below `Mnchar::~Mnchar() {}`, define `projectile_scene`'s setter and getter functions as follows:
+
+    ```
+    Ref<PackedScene> Mnchar::get_projectile_scene() { return projectile_scene; }
+
+    void Mnchar::set_projectile_scene(Ref<PackedScene> packed_scene) {
+    projectile_scene = packed_scene;
+    }
+    ```
+
+    (Based on reference 8)
+
+1. Next, within mnchar.cpp, add the following definition of this function right after your `Mnchar::start()` function:
+
+    ```
+    {
+    auto projectile =
+        reinterpret_cast<Projectile *>(projectile_scene->instantiate());
+
+    Transform3D projectile_transform =
+        get_node<Node3D>("Pivot")->get_global_transform();
+
+    projectile_transform =
+        projectile_transform.translated_local(Vector3(0, 0, 3));
+    projectile->start(projectile_transform, mnchar_id);
+    get_parent()->add_child(projectile);
+    }
+    ```
+
+    We need to initialize the projectile's transform as that of the main character's Pivot node because it's this node, not Mnchar itself, whose basis we adjust when moving the player. 
+
+    The `translated_local()` call creates some distance in between the projectile and the firer. This prevents the firer from getting hit by its own bullet immediately after firing! (We're using `translated_local()` rather than `translate()` here because we want to move the projectile in front of the Mnchar's field of view rather than the game area itself.)
+
+    Adding `get_parent()` before `add_child()` ensures that these projectiles are children of the parent scene (e.g. main.tscn) rather than the character. Without this line, projectiles might rotate whenever the character rotates--which, while a potentially-cool mechanic, isn't what we're looking for here.
+
+    (Based on references 8, 18, 24, 29, 30, and 31)
+
+1. Now that we have a function for firing projectiles, we also need to allow the player to trigger (pun intended?) it. We can do so by adding the following code right after `auto input = Input::get_singleton();` within `Mnchar::_physics_process`:
+
+    ```
+    if ((input->is_action_just_pressed("fire_" + mnchar_id)) &&
+        (input->is_action_pressed("reset_" + mnchar_id) == false)) {
+        shoot_projectile();
+    }
+
+    ```
+
+    Later in this tutorial, we'll allow players to start a new game by pressing both their 'fire' and 'reset' buttons. Therefore, I added code to this `if` statement that will only allow a projectile to get fired when reset is *not* being pressed. (Otherwise,the game would always start with a projectile being fired, which could give the firing player an advantage and/or distort any accuracy statistics that we might choose to collect.)
+
+1. Compile your code, then restart your editor. When you click on mnchar.tscn, you should see a new 'Packed Scene' attribute below 'Movement Speed' and 'Rotation Speed' near the top of the editor. (It's neat how these variables get formatted automatically to look nicer within the editor, by the way.) Click the folder icon to the right of 'empty', then select projectile.tscn.
+
+1. Launch your game. Confirm that pressing space bar causes a projectile to fire in front of the player's turret. Also confirm that this remains the case regardless of which direction the player is facing, and that the projectile's velocity isn't affected in any way by the player's actions following the fire command. (It took quite a bit of debugging on my part when I was initially coding this section to get things working. I hope that you won't need to do the same, but don't get too frustrated if things don't work right away.)
+
+![](/tutorial_screenshots/firing_projectiles.png)
+
+## Part 11: Adding a second Mnchar to the scene
+
+1. Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. And since having two identical Mnchars within a scene can get confusing, this will also be a good time to create code that assigns different colors to different players. (This is a bit like If You Give a Mouse a Cookie, but in game-development form!)
 
 # Here with editing:
 
-Next, add in projectile-launch code (which will first involve creating a projectile), followed by code that allows the player to respond to being hit by a projectile (which will involve adding in a projectile detector).
+Add color, transform, and rotation dictionaries to main.h; use those to initialize two different characters; and also add in code that updates the colors of Mnchars (and perhaps projectiles, since it will be fresh in the reader's memory at this point) based on mnchar_id values. Then apply these dictonaries when adding new players to the game via main.cpp--though you can still just hardcode the addition of two players at this point.
+
+Don't forget to make materials/meshes local to the scene!
+
+## Notes for future sections:
+
+HUD: Simplify your _process script by creating multiple text variables (one for the winner, one for the instructions, etc.) that can store various messages--then create an 'update_game_start_message()' function that combines those variables together, then outputs the text. Call this function within _process() only when necessary. That way, you won't need to call show_message() during every processing frame.
+
+Also, look into ways to pause _process when you're not preparing a new game.
+
+
 
 
 ## References
@@ -786,3 +1016,23 @@ Notes:
 * Reference 20: /godot-cpp/src/variant/vector3.cpp
 
 * Reference 21: /godot-cpp/include/godot_cpp/variant/vector3.hpp
+
+* Reference 22: https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html
+
+* Reference 23: https://docs.godotengine.org/en/stable/tutorials/physics/using_character_body_2d.html
+
+* Reference 24: https://kidscancode.org/godot_recipes/3.x/3d/3d_shooting/
+
+* Reference 25: https://github.com/godotengine/tps-demo/blob/master/player/player.gd
+
+* Reference 26: https://github.com/vorlac/godot-roguelite/blob/main/src/entity/projectile/projectile.cpp
+
+* Reference 27: /godot-cpp/gen/src/classes/node3d.cpp
+
+* Reference 28: /godot-cpp/include/godot_cpp/variant/basis.hpp
+
+* Reference 29: https://docs.godotengine.org/en/stable/classes/class_transform3d.html#class-transform3d-method-translated
+
+* Reference 30: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-get-parent
+
+* Reference 31: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-add-child

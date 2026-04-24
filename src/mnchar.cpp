@@ -19,11 +19,26 @@ void Mnchar::_bind_methods() {
                        &Mnchar::set_rotation_speed);
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "rotation_speed"),
                "set_rotation_speed", "get_rotation_speed");
+
+  ClassDB::bind_method(D_METHOD("get_projectile_scene"),
+                       &Mnchar::get_projectile_scene);
+  ClassDB::bind_method(D_METHOD("set_projectile_scene", "projectile_scene"),
+                       &Mnchar::set_projectile_scene);
+  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
+                            PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
+               "set_projectile_scene", "get_projectile_scene");
+
 }
 
 Mnchar::Mnchar() {}
 
 Mnchar::~Mnchar() {}
+
+Ref<PackedScene> Mnchar::get_projectile_scene() { return projectile_scene; }
+
+void Mnchar::set_projectile_scene(Ref<PackedScene> packed_scene) {
+  projectile_scene = packed_scene;
+}
 
 void Mnchar::set_movement_speed(const double p_movement_speed) {
   movement_speed = p_movement_speed;
@@ -51,9 +66,30 @@ void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg)
   translate(mnchar_translate_arg);
 }
 
+void Mnchar::shoot_projectile()
+
+{
+  auto projectile =
+      reinterpret_cast<Projectile *>(projectile_scene->instantiate());
+
+  Transform3D projectile_transform =
+      get_node<Node3D>("Pivot")->get_global_transform();
+
+  projectile_transform =
+      projectile_transform.translated_local(Vector3(0, 0, 3));
+  projectile->start(projectile_transform, mnchar_id);
+  get_parent()->add_child(projectile);
+}
+
 void Mnchar::_physics_process(double delta) {
 
   auto input = Input::get_singleton();
+
+  if ((input->is_action_just_pressed("fire_" + mnchar_id)) &&
+      (input->is_action_pressed("reset_" + mnchar_id) == false)) {
+
+    shoot_projectile();
+  }
 
   float x_direction =
       input->get_axis("move_right_" + mnchar_id, "move_left_" + mnchar_id);

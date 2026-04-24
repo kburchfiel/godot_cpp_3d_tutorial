@@ -7,6 +7,8 @@
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event.hpp>
 #include <godot_cpp/classes/input_map.hpp>
+#include <godot_cpp/classes/packed_scene.hpp>
+#include "projectile.h"
 
 using namespace godot;
 
@@ -17,6 +19,7 @@ private:
   double movement_speed = 14;
   double rotation_speed = 0.15;
   String mnchar_id = "";
+  Ref<PackedScene> projectile_scene;
 
 protected:
   static void _bind_methods();
@@ -36,5 +39,12 @@ public:
 
   void start(String mnchar_id_arg, Vector3 mnchar_translate_arg);
 
+  Ref<PackedScene> get_projectile_scene();
+  void set_projectile_scene(Ref<PackedScene>);
+
+  void shoot_projectile();
+
   void _physics_process(double delta) override;
+
+
 };

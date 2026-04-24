@@ -1,6 +1,8 @@
 #include "register_types.h"
 #include "main.h"
 #include "mnchar.h"
+#include "projectile.h"
+
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
@@ -15,6 +17,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
     GDREGISTER_RUNTIME_CLASS(Main);
     GDREGISTER_RUNTIME_CLASS(Mnchar);
+    GDREGISTER_RUNTIME_CLASS(Projectile);
 
 }
 
