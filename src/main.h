@@ -4,9 +4,10 @@
 #include "mnchar.h"
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/core/math_defs.hpp>
 #include <godot_cpp/variant/typed_dictionary.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 
 using namespace godot;
 
@@ -34,6 +35,8 @@ private:
       {String("4"), Color(1, 0, 1, 1)}, {String("5"), Color(1, 1, 0, 1)},
       {String("6"), Color(1, 1, 1, 1)}, {String("7"), Color(0, 0, 0, 1)}};
 
+  HashSet<String> active_mnchars{};
+
 protected:
   static void _bind_methods();
 
@@ -43,6 +46,11 @@ public:
 
   Ref<PackedScene> get_mnchar_scene();
   void set_mnchar_scene(Ref<PackedScene>);
+
+  void _on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
+                             String firing_mnchar_id_arg);
+
+  void end_game(String winning_mnchar_id);
 
   void _ready();
 };

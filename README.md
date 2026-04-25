@@ -1048,10 +1048,10 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
         UtilityFunctions::print("Main::_ready() just got called.");
 
-        Array players_to_include {"0", "1"};
-        for (int index = 0; index < players_to_include.size(); index++)
+        Array mnchars_to_include {"0", "1"};
+        for (int index = 0; index < mnchars_to_include.size(); index++)
         {
-        String mnchar_id_arg = players_to_include[index];
+        String mnchar_id_arg = mnchars_to_include[index];
         Color mnchar_color_arg = mnchar_id_color_dict[mnchar_id_arg];
         Vector3 mnchar_translate_arg = mnchar_id_location_dict[mnchar_id_arg];
         double mnchar_rotation_arg = mnchar_id_rotation_dict[mnchar_id_arg];
@@ -1070,9 +1070,30 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     We're now adding new Mnchars to the game via a loop that iterates through an array of Mnchar IDs. These IDs are used to specify each player's color, translation, and rotation, all of which (together with the ID) then get passed to our `Mnchar::start()` function.
 
-    The `players_to_include` Array will later get initialized using the keys of a Dictionary (as `Dictionary.keys()` returns an Array), but for now, we'll store hardcoded "0" and "1" values within .
+    The `mnchars_to_include` Array will later get initialized using the keys of a Dictionary (as `Dictionary.keys()` returns an Array), but for now, we'll store hardcoded "0" and "1" values within .
 
-1. Go ahead and compile your code, then launch your main scene within the editor. You should see the following:
+
+1. Go ahead and compile your code, then restart the editor. Now that we have a second Mnchar within our game, we should add in inputs for this player. Go to Project --> Project Settings --> Input Map to access the input editor.
+
+1. If you happen to have a game controller with two joysticks and left/right triggers available, connect it to your computer now. (If you don't, no worries--I'll show you another way to add these controls.) For the move_left_1, move_right_1, move_forward_1, and move_back_1 actions, move your left joystick left, right, forward, and back to add them as inputs. For the rotate_left and rotate_right actions, move your right joystick to the left and to the right. Finally, for the fire_1 and reset_1 commands, press the right and left triggers, respectively.
+
+    When adding in each of these actions, make sure to specify Device 1 (not 'All devices') as the input device. Otherwise, these actions will also affect the movement of Mnchar 0.
+
+    ![](/tutorial_screenshots/adding_player_1_controls.png)
+
+    You can also peform similar steps for your existing actions that end in '_0'. Just make sure to select Device 0 for those rather than Device 1.
+
+    In order to make debugging easier, link the '0' key on your keyboard to the 'fire_0' command, and the '1' key to 'fire_1'. (You'll see why I recommend this soon.)
+
+    Once you've made these changes, the lower section of your input map should look like the following:
+
+    ![](/tutorial_screenshots/player_1_inputs.png)
+
+    If you don't have a controller, or simply don't want to go through the trouble of adding in these commands, you can *also* go to this repository's project.godot file (https://github.com/kburchfiel/godot_cpp_3d_tutorial/blob/main/project/project.godot); copy all of the text between the `[input]` entry and the [`physics`] entry; and then paste it into your own project's project.godot file. (This file should be available at /project/project.godot.)
+
+1. If you just really, *really* love adding these inputs, you can enter similar commands for device IDs 2 through 7 manually. However, I highly recommend that you instead copy those actions from the previous link and paste them into your project.godot file. (By the way, I created most of these inputs, aside from the keyboard-based ones, via another set of C++ code. See Reference 47 for the link.) Once you've finished these copy/paste commands, make sure that they're appearing within your input map.
+
+1. Launch your main scene. You should see the following:
 
     ![](/tutorial_screenshots/two_green_players.png)
 
@@ -1084,15 +1105,258 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. As the blue Mnchar, try firing some projectiles towards the green Mnchar by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) You should see the projectiles stop in place when they reach the green Mnchar, though if enough of them get fired, it might shift it around a bit. We'll now change this behavior so that a Mnchar who gets hit by a projectile gets removed from the game scene.
 
+## Part 12: Detecting collisions
+
+1. In order to determine when a Mnchar has gotten hit, we'll need to add an Area3D node that can detect such collisions. Go ahead and add such a node as a child of your Mnchar, then rename it 'Projectile_Detector.' Next, add a CollisionShape3D as a child of Projectile_Detector; click on the 'empty' text next to the Shape section within its Inspector menu; and choose a BoxShape3D. Click on the 'BoxShape3D' text to enter the edit menu, then set the x, y, and z sizes to 2.0 meters. (Reference 41)
+
+1. Go back to your Projectile_Detector node and deselect the 'Monitoring' property within the Inspector (but keep 'Monitorable' active). Next, click 'Collision' within the CollisionObject3D section of the Projectile_Detector's Inspector menu in order to open up its Layer and Mask settings. Deselect the '1' within the Layer and Mask sections, then select the '2'. This will allow the detector to recognize collisions only with objects with a Layer value of 2. (Reference 41)
+
+1. As you might have guessed, we'll now want to set the Layer value of our Projectile's CollisionObject3D to 2. Double-click on projectile.tscn; then, with the Projcetile selected in the top left, deselect the '1' values within the Layer and Mask sections of the Inspector menu's CollisionObject3D section. Next, select the '2' value within the Layer section. 
+
+1. Go back into your code editor. Within mnchar.h, add the following line right after `void shoot_projectile()` within the `public` section:
+
+    void _on_projectile_detector_body_entered(Node3D *node);
+
+    This function will allow us to react to a Projectile's collision with a Mnchar's Projectile_Detector component.
+
+1. Next, within mnchar.cpp, add the following lines to the end of your `_bind_methods()` definition:
+
+    ```
+    ADD_SIGNAL(MethodInfo("mnchar_hit",
+                        PropertyInfo(Variant::STRING, "mnchar_id"),
+                        PropertyInfo(Variant::STRING, "firing_mnchar_id")));
+
+    ClassDB::bind_method(D_METHOD("_on_projectile_detector_body_entered", "node"),
+                       &Mnchar::_on_projectile_detector_body_entered);
+
+    ```
+
+    Here, we're adding a signal (along with two arguments) as a property so that it can get accessed later on by main.cpp. We're also providing Godot with information about our `_on_projectile_detector_body_entered` function so that we can connect the Projectile_Detector's built-in `body_entered` signal to it.
+
+    (Reference 33)
+
+1. Add the following right below your `shoot_projectile()` function definition within mnchar.cpp:
+    
+    ```
+    void Mnchar::_on_projectile_detector_body_entered(Node3D *node) {
+    UtilityFunctions::print(
+        "on_body_entered() just got called within mnchar.cpp.");
+    Projectile *node_as_projectile = Object::cast_to<Projectile>(node);
+    String firing_mnchar_id = node_as_projectile->get_firing_mnchar_id();
+    emit_signal("mnchar_hit", mnchar_id, firing_mnchar_id);
+    queue_free();
+    }
+    ```
+    (References 8, 38, and 43)
+
+    The `queue_free()` function removes this Mnchar from the game. 
+    
+    Note that this function converts the `node` argument to a Projectile so that we can access the ID of its firing player. (This step would most likely cause the game to crash if items other than projectiles were registered by our Projectile_Detector. However, setting our layer and mask options correctly within the editor *should* ensure that only projectile collisions will cause this function to get called.)
+   
+
+1. Go ahead and compile the code, then restart the Godot editor to incorporate these changes. You'll find that, if you hit a Mnchar with a projectile, nothing will happen. This is because we haven't yet connected the Projectile_Detector's `body_entered` signal to our `_on_projectile_detector_body_entered` function.
+
+1. There are two ways to do this. I'll first describe the GUI-based approach. Within the editor, select select the Projectile_Detector node within mnchar.tscn. Next, go to the Signals tab (to the right of the Inspector); right-click the `body_entered(body: Node3D)` signal; and select 'Connect'. Within the 'Connect a Signal to a Method' box that appears, Click on the Mnchar scene within the node list (which should bring up `_on_projectile_detector_body_entered` as a suggested function, then hit the 'Connect' button. This will inform the game that, whenever the `body_entered` signal gets triggered, the Mnchar's corresponding `_on_projectile_detector_body_entered` function should be called. (Reference 41)
+
+    If all goes well, you should then see a little green icon appear below the `body_entered` signal in the Signals tab--along with the txt `.. :: _on_projectile_detector_body_entered()`. (The `..` signifies that you've conneced this signal to its parent, e.g. Mnchar.)
+
+    ![](/tutorial_screenshots/body_entered_signal.png)
+
+1. Relaunch your game and try firing a projectile at the green Mnchar. Once the projectile hits the Mnchar, it should now disappear.
+
+1. This approach works fine, except I've found that connected signals sometimes disappear from the editor--which requires me to re-add them on occasion. (As with the disppearing-packed-scene behavior I mentioned earlier, I'm not sure what's behind this issue.) Therefore, I now prefer to add signals within code, which is *also* a great option for connecting signals between nodes that don't share a scene tree in the editor. (An example of this, which we'll get too shortly, is the connection of a Mnchar signal to Main. Since Mnchars aren't present within the Main class by default, we can't use the GUI to connect this signal--but we *can* do so using C++.)
+
+1. To connect the Projectile_Detector's `body_entered` signal to `_on_projectile_detector_body_entered`, first add `#include <godot_cpp/classes/area3d.hpp>` to the bottom of your main.h file's `#include` statements. Next, within main.cpp, add the following to the end of your `Mnchar::start()` function:
+
+    ```
+    get_node<Area3D>("Projectile_Detector")->connect(
+    "body_entered", Callable(this, "_on_projectile_detector_body_entered"));                                                 
+    ```
+
+    This code first retrieves the Mnchar's Projectile_Detector, then connects its body_entered signal to the `_on_projectile_detector_body_entered` function of 'this' (which refers to Mnchar). (Reference 1)
+
+    Note that it doesn't appear necessary to mention the Node3D argument of `body_entered` (listed within the Godot editor) within this `connect()` call.
+
+    If we didn't have a `start()` function, we could have added this within a new `_ready()` function instead. (In contrast, I found that attempting to add this code within the `Mnchar::Mnchar()` constructor did *not* work--perhaps because the Projectile_Detector wasn't yet accessible at that time.)
+
+    If you compile your code once again and restart the game, you should still be able to remove another Mnchar from the game by hitting it with a projectile, even if the editor doesn't show a connection between the Projectile_Detector's `body_entered` signal and the Mnchar's `_on_projectile_detector_body_entered` function.
+
+## Part 13: Ending the game
+
+1. We're very close to having a working prototype of our game--one in which two players can attempt to hit one another with projectiles. Unless both players hit each other at the same time, we should be able to figure out who won (e.g. by seeing which player is left standing). However, it will be ideal to have the game determine this as well.
+
+1. Within main.h, add the following code right below your `mnchar_id_color_dict` initialization:   
+
+    `HashSet<String> active_mnchars{};`
+    
+    This HashSet will store a list of active Mnchars. Once the size of this set becomes less than two, we can determine which Mnchar (if any) won the game. (If two Mnchars hit each other at exactly the same time, the length of this set will become 0, and no winner will be declared.)
+
+    (References 32, 44, and 45)
+
+1. Next, right below `add_child(new_mnchar)` within the for loop in main.cpp's `Main::_ready()` function, add:
+
+    `active_mnchars.insert(mnchar_id_arg);`
+
+    This way, every Mnchar in the `mnchars_to_include` array will also get added to our list of active players. 
+    
+    (I believe we could also have simply used the `mnchars_to_include` array to keep track of our active players; however, I did want to introduce the HashSet type within this tutorial, and this is a great way to do so. Similarly, instead of initializing `mnchars_to_include` later on by retrieving the keys of a Dictionary within a new Hud class, we could have passed an Array from Hud instead; however, I wanted to provide a simple demonstration of the Dictionary class.)
+
+
+1. Finally, at the end of `Main::_ready()`, add the following code:
+
+    ```
+    UtilityFunctions::print("Printing out all active players in set:");
+    for (auto active_mnchars_iterator = active_mnchars.begin();
+        active_mnchars_iterator != active_mnchars.end();
+        ++active_mnchars_iterator) {
+        UtilityFunctions::print(*active_mnchars_iterator);
+    }
+
+    ```
+
+    This both demonstrates how to iterate through a HashSet and helps identify which Mnchars got added to the game. (Reference 46)
+
+1. Once we allow multiple games to be played within a single session, we'll want to clear out `active_mnchars` before each game so as to prevent dormant Mnchars from lingering around. To do so, add the following line at the start of `Main::_ready()`:
+
+    ```
+    active_mnchars.clear();
+    ```
+
+1. In order to *remove* Mnchars from `active_mnchars` (and thus figure out when the game is over), we'll need to connect the `mnchar_hit` signal from main.cpp to a function within main.cpp that can process it. Let's declare and define this function now. First, within main.h, add the following right before `void _ready()` within the `private` section of main.h:
+
+
+
+    ```
+    void _on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
+                                String firing_mnchar_id_arg);
+    ```
+
+1. Next, at the bottom of your `Main::_bind_methods()` function within main.cpp, add:
+
+    ```
+    ClassDB::bind_method(D_METHOD("_on_mnchar_mnchar_hit", "hit_mnchar_id_arg"),
+                        &Main::_on_mnchar_mnchar_hit);
+    ```
+
+    That way, we can reference this function within some signal-connection code that we'll add in shortly. (Note that both the function and its parameter should be included here.)
+
+1. Finally, right above your `void Main::_ready() function` in main.cpp, define this new `Main::_on_mnchar_mnchar_hit` function as follows:
+
+    ```
+    void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
+                                    String firing_mnchar_id_arg) {
+    UtilityFunctions::print("The Mnchar with an ID of ", hit_mnchar_id_arg,
+                            " was just hit by the Mnchar with an ID of ",
+                            firing_mnchar_id_arg, ".");
+    active_mnchars.erase(hit_mnchar_id_arg);
+    // See godot-cpp/include/godot_cpp/templates/hash_set.hpp
+
+    UtilityFunctions::print("Current size of active_mnchars: ",
+                            active_mnchars.size());
+
+    if (active_mnchars.size() == 1)
+
+    {
+        String winning_mnchar = *active_mnchars.begin();
+        UtilityFunctions::print("The player with the ID of "+
+    winning_mnchar+" won the game.");
+    }
+
+    else if (active_mnchars.size() == 0) {
+        UtilityFunctions::print("Nobody won the game.")
+    }
+    }
+    ```
+    If, after a Mnchar gets hit, only one Mnchar remains in the HashSet, we can identify the winning Mnchar by creating an iterator to the first (and only) item in this set (using `.begin()`), then dereferencing it to identify the winning ID.
+
+    Meanwhile, if the final two players got hit at the exact same time, `active_mnchars` will be empty. In this case, we'll announce that no one won the game. 
+
+    (References 45 and 46)
+
+1. Next, add the following line right after `auto new_mnchar =
+        reinterpret_cast<Mnchar *>(get_mnchar_scene()->instantiate());` within `Main::_ready()` in main.cpp:
+
+    ```
+    new_mnchar->connect("mnchar_hit", Callable(this, "_on_mnchar_mnchar_hit"));
+    ```
+    
+    This will instruct Godot to call `_on_mnchar_mnchar_hit` whenever a Mnchar gets hit. (It's helpful, and perhaps necessary, to perform this connection via code rather than the editor, as the Mnchars in the game won't be present within the main.tscn scene tree beforehand.)
+
+1. Compile your code, restart your editor, and try hitting the blue Mnchar with a projectile. Once you succeed, the console should inform you that "The player with the ID of 0 won the game."
+
+    ![](/tutorial_screenshots/winning_player_in_console.png)
+
+1. When a game ends, we'll want to remove the final active player (e.g. the winner) from the scene. Otherwise, that player will still be active when we begin a new game--which would be an interesting mechanic for sure, but not one we'll want for this tutorial.
+
+    To prepare to remove all players, select your Mnchar within mnchar.tscn's scene tree, then go over to the Groups tab (to the right of the Inspector and Signals tabs). Click the '+' to the left of the text bar to open up a Create New Group dialog. Name your group 'mnchars' and hit 'OK.'
+
+    ![](/tutorial_screenshots/mnchar_scene_group.png)
+
+1. We'll make use of this new scene group within a new `end_game()` function. Within main.h's `public` section, add `void end_game(String winning_mnchar_id);` right after your `void _on_mnchar_mnchar_hit()` function declaration. In addition, add `#include <godot_cpp/classes/scene_tree.hpp>` to the bottom to that file's list of `#include` statements.
+
+1. Next, right before `void Main::_ready()` within main.cpp, define this new function as follows:
+
+    ```
+    void Main::end_game(String winning_mnchar_id) {
+    get_tree()->call_group("mnchars", "queue_free");
+
+    String new_winner_message = "The winning player \
+    is: " + winning_mnchar_id;
+
+    UtilityFunctions::print(new_winner_message);
+    }
+    ```
+    (Reference 8)
+
+    The first line of the function removes all Mnchars within the 'mnchars' group that we just created, thus preparing our game area for a subsequent round.
+
+1. Update the `if/else if` section of `void Main::_on_mnchar_mnchar_hit())` so that it reads as follows:
+
+  ```
+  if (active_mnchars.size() == 1)
+
+  {
+    String winning_mnchar = *active_mnchars.begin();
+    end_game(winning_mnchar);
+  }
+
+  else if (active_mnchars.size() == 0) {
+    end_game("Nobody");
+  }
+  ```
+
+  Now that we're printing the winning player within `end_game()`, I removed the print() calls from this `if/else if` code, though you can also keep them in if you'd prefer.
+
+1. Compile your code, restart Godot, and play your main scene. When you hit one Mnchar with another, both Mnchars should be removed from the game area.
+
+## Part 14: Adding a heads-up display (HUD)
+
+1. Congratulations! You now have a working 3D multiplayer game in C++. After launching the game, you and a friend or family member can try hitting each other's Mnchar with a projectile; once one of you succeeds, the console will announce a winner, and the game will end. You can then restart the scene to play again.
+
+    However, there are plenty of ways that we can improve on this setup:
+    
+    1. Since the debug console won't always be available, some in-game text should let you know who won.
+    1. It would be ideal to be able to launch a new game without restarting the scene.
+    1. Before we launch a new game, we should allow new players to join and previous players to opt out. 
+    1. The game could show statistics on how many hits each player achieved within the previous game--and the overall number of hits and wins each player has earned since the session began. There should also be a way to reset these overall stats.
+    1. Players should be able to exit out of a game in progress while also preventing this canceled game from affecting their overall stats.
+
+    To implement these enhancements, we'll create a new Hud class that can display in-game text *and*, via its `_process` function, handle new-game-setup tasks. Here's a simplified overview of how this class will interact with Main:
+
+    1. When `Main::_end_game()` is called, a label within Hud will announce the winner. Next, Hud's `_process()` function will launch, thus allowing new players to enter the game.
+
+    1. Hud will store, and display, information about which players have chosen to enter the next game. (It will gather this information by checking for player inputs within `_process()`.)
+
+    1. Once a player holds down both the `fire` and `reset` buttons, Hud() will emit a signal, along with information about the players who want to join, that Main will use to (1) call a new game-start function and (2) pause hud's `_process()` function.    
+
+
+
 # Here with editing:
 
-Update mash/layer values so that projectiles, but not characters, remove players from scenes when they hit them. Also add/connect signals as needed to make this work. Then have the game end when fewer than two Mnchars are present--and allow the game to get restarted by adding new players in. (This will require creating a Hud class fairly soon.)
+Begin building out your HUD code--but also find a way for Main to pause, then resume, Hud's `_process()` function. (If this isn't possible, you can use the approach you took within your demo--but just update the explanation of how Main and Hud will interact that you wrote near the start of Part 14 accordingly.)
 
-## Notes for future sections:
+Also, for HUD: Simplify your `_process()` script by creating multiple text variables (one for the winner, one for the instructions, etc.) that can store various messages--then create an 'update_game_start_message()' function that combines those variables together, then outputs the text. Call this function within _process() only when necessary. That way, you won't need to call show_message() during every processing frame.
 
-HUD: Simplify your _process script by creating multiple text variables (one for the winner, one for the instructions, etc.) that can store various messages--then create an 'update_game_start_message()' function that combines those variables together, then outputs the text. Call this function within _process() only when necessary. That way, you won't need to call show_message() during every processing frame.
-
-Also, look into ways to pause _process when you're not preparing a new game.
 
 
 
@@ -1192,3 +1456,19 @@ Notes:
 * Reference 39: https://discord.com/channels/212250894228652034/342047011778068481/1489038771600101457
 
 * Reference 40: https://www.somethinglikegames.de/en/blog/2023/material-synchronization/
+
+* Reference 41: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/07.killing_player.html
+
+* Reference 42: https://docs.godotengine.org/en/4.6/getting_started/first_3d_game/06.jump_and_squash.html
+
+* Reference 43: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-queue-free
+
+* Reference 44: https://github.com/godotengine/godot/blob/master/core/templates/hash_set.h
+
+* Reference 45: godot-cpp/include/godot_cpp/templates/hash_set.hpp
+
+* Reference 46: https://stackoverflow.com/a/12863273/13097194
+
+* Reference 47: https://github.com/kburchfiel/godot_cpp_3d_demo/tree/main/input_map_creator
+
+* Reference 48: https://docs.godotengine.org/en/4.6/getting_started/first_2d_game/06.heads_up_display.html

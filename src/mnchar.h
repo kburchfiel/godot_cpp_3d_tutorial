@@ -11,6 +11,7 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/area3d.hpp>
 
 using namespace godot;
 
@@ -48,6 +49,8 @@ public:
   void set_mnchar_color(const Color mnchar_color);
 
   void shoot_projectile();
+
+  void _on_projectile_detector_body_entered(Node3D *node);
 
   void _physics_process(double delta) override;
 };

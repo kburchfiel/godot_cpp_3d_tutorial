@@ -27,9 +27,17 @@ void Mnchar::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
                             PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
                "set_projectile_scene", "get_projectile_scene");
+
+  ADD_SIGNAL(MethodInfo("mnchar_hit",
+                        PropertyInfo(Variant::STRING, "mnchar_id"),
+                        PropertyInfo(Variant::STRING, "firing_mnchar_id")));
+
+  ClassDB::bind_method(D_METHOD("_on_projectile_detector_body_entered", "node"),
+                       &Mnchar::_on_projectile_detector_body_entered);
 }
 
-Mnchar::Mnchar() {}
+Mnchar::Mnchar() {
+}
 
 Mnchar::~Mnchar() {}
 
@@ -58,11 +66,11 @@ void Mnchar::set_mnchar_id(const String p_mnchar_id) {
 String Mnchar::get_mnchar_id() const { return mnchar_id; }
 
 void Mnchar::set_mnchar_color(const Color mnchar_color_arg) {
-  Ref<BaseMaterial3D> mncharbody_mesh_material_3d = (
-      get_node<Node3D>("Pivot")
-          ->get_node<MeshInstance3D>("Body")
-          ->get_mesh()
-          ->surface_get_material(0));
+  Ref<BaseMaterial3D> mncharbody_mesh_material_3d =
+      (get_node<Node3D>("Pivot")
+           ->get_node<MeshInstance3D>("Body")
+           ->get_mesh()
+           ->surface_get_material(0));
 
   mncharbody_mesh_material_3d->set_albedo(mnchar_color_arg);
 
@@ -70,17 +78,18 @@ void Mnchar::set_mnchar_color(const Color mnchar_color_arg) {
       ->get_node<MeshInstance3D>("Body")
       ->get_mesh()
       ->surface_set_material(0, Ref<Material>(mncharbody_mesh_material_3d));
-    }
+}
 
 void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
-                   double mnchar_rotation_arg, Color mnchar_color_arg)
-{
+                   double mnchar_rotation_arg, Color mnchar_color_arg) {
   set_mnchar_id(mnchar_id_arg);
   UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
   translate(mnchar_translate_arg);
   set_mnchar_color(mnchar_color_arg);
   get_node<Node3D>("Pivot")->rotate_object_local(Vector3(0, 1, 0),
                                                  mnchar_rotation_arg);
+get_node<Area3D>("Projectile_Detector")->connect(
+"body_entered", Callable(this, "_on_projectile_detector_body_entered"));                                                 
 }
 
 void Mnchar::shoot_projectile()
@@ -96,6 +105,15 @@ void Mnchar::shoot_projectile()
       projectile_transform.translated_local(Vector3(0, 0, 3));
   projectile->start(projectile_transform, mnchar_id);
   get_parent()->add_child(projectile);
+}
+
+void Mnchar::_on_projectile_detector_body_entered(Node3D *node) {
+  UtilityFunctions::print(
+      "on_body_entered() just got called within mnchar.cpp.");
+  Projectile *node_as_projectile = Object::cast_to<Projectile>(node);
+  String firing_mnchar_id = node_as_projectile->get_firing_mnchar_id();
+  emit_signal("mnchar_hit", mnchar_id, firing_mnchar_id);
+  queue_free();
 }
 
 void Mnchar::_physics_process(double delta) {
