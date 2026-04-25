@@ -1082,11 +1082,11 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     ![](/tutorial_screenshots/blue_and_green_mnchars.png)
 
-    As the blue player, try firing some projectiles towards the green player by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) 
+1. As the blue Mnchar, try firing some projectiles towards the green Mnchar by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) You should see the projectiles stop in place when they reach the green Mnchar, though if enough of them get fired, it might shift it around a bit. We'll now change this behavior so that a Mnchar who gets hit by a projectile gets removed from the game scene.
 
 # Here with editing:
 
-Update mash/layer values so that projectiles, but not characters, remove players from scenes when they hit them. Also add/connect signals as needed to make this work.
+Update mash/layer values so that projectiles, but not characters, remove players from scenes when they hit them. Also add/connect signals as needed to make this work. Then have the game end when fewer than two Mnchars are present--and allow the game to get restarted by adding new players in. (This will require creating a Hud class fairly soon.)
 
 ## Notes for future sections:
 
