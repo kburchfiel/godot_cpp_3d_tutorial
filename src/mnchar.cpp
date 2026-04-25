@@ -27,7 +27,6 @@ void Mnchar::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packed_scene",
                             PROPERTY_HINT_RESOURCE_TYPE, "PackedScene"),
                "set_projectile_scene", "get_projectile_scene");
-
 }
 
 Mnchar::Mnchar() {}
@@ -58,12 +57,30 @@ void Mnchar::set_mnchar_id(const String p_mnchar_id) {
 
 String Mnchar::get_mnchar_id() const { return mnchar_id; }
 
-void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg)
+void Mnchar::set_mnchar_color(const Color mnchar_color_arg) {
+  Ref<BaseMaterial3D> mncharbody_mesh_material_3d = (
+      get_node<Node3D>("Pivot")
+          ->get_node<MeshInstance3D>("Body")
+          ->get_mesh()
+          ->surface_get_material(0));
 
+  mncharbody_mesh_material_3d->set_albedo(mnchar_color_arg);
+
+  get_node<Node3D>("Pivot")
+      ->get_node<MeshInstance3D>("Body")
+      ->get_mesh()
+      ->surface_set_material(0, Ref<Material>(mncharbody_mesh_material_3d));
+    }
+
+void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
+                   double mnchar_rotation_arg, Color mnchar_color_arg)
 {
   set_mnchar_id(mnchar_id_arg);
   UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
   translate(mnchar_translate_arg);
+  set_mnchar_color(mnchar_color_arg);
+  get_node<Node3D>("Pivot")->rotate_object_local(Vector3(0, 1, 0),
+                                                 mnchar_rotation_arg);
 }
 
 void Mnchar::shoot_projectile()

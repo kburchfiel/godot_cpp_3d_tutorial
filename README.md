@@ -562,13 +562,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
         ```
     1. In summary, by having Mnchar IDs match movement-name suffixes, and by having all movements for a particular suffix match only one particular device, we can create a functioning multiplayer control setup without too much extra work. (This approach was based on references 11 through 15.) 
 
-1. The first step here will be to add a `mnchar_id` value to our Mnchar class. Under `double movement_speed = 14;` within the `private:` section of Mnchar.h, add:
+1. The first step here will be to add a `mnchar_id` value to our Mnchar class. Under `double movement_speed = 14;` within the `private` section of Mnchar.h, add:
 
     ```
     String mnchar_id = "";
     ```
 
-    Next, in the `public:` section, add the following setter and getter function declarations under your `get_movement_speed()` function declaration:
+    Next, in the `public` section, add the following setter and getter function declarations under your `get_movement_speed()` function declaration:
 
     ```
     void set_mnchar_id(const String mnchar_id);
@@ -864,7 +864,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     #include "projectile.h"
     ```
 
-1. Next, add `void shoot_projectile();` right above `void _physics_process(double delta) override;`. Then add `Ref<PackedScene> projectile_scene;` at the end of your `private:` section (right after `String mnchar_id = "";`). Finally, add the following code rigth before `shoot_projectile()` within the `public` section of this file:
+1. Next, add `void shoot_projectile();` right above `void _physics_process(double delta) override;`. Then add `Ref<PackedScene> projectile_scene;` at the end of your `private` section (right after `String mnchar_id = "";`). Finally, add the following code rigth before `shoot_projectile()` within the `public` section of this file:
 
     ```
     Ref<PackedScene> get_projectile_scene();
@@ -942,13 +942,151 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 11: Adding a second Mnchar to the scene
 
-1. Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. And since having two identical Mnchars within a scene can get confusing, this will also be a good time to create code that assigns different colors to different players. (This is a bit like If You Give a Mouse a Cookie, but in game-development form!)
+1. Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. 
+
+    Since having two identical Mnchars within a scene can get confusing, this will also be a good time to create code that assigns different colors to different players. And in order to assign those colors, we may as well set up a typed dictionary that will store colors for all the players who will might eventually join our game. 
+    
+    Finally, since we're adding a typed dictionary for player colors, we may as well add ones for starting locations and rotation values as well, as these will also play an important role in initializing new Mnchars.
+    
+    (This is a bit like If You Give a Mouse a Cookie, but in game-development form! It's funny quickly one programming task can lead to five others.)
+
+1. With that rambling introduction out of the way, let's go ahead and create typed dictionaries that will store colors, rotation values, and starting locations for all of our players. Within main.h, add `#include <godot_cpp/variant/typed_dictionary.hpp>` to the bottom of your list of `#include statements`. Next, enter the following code right below `Ref<PackedScene> mnchar_scene` within the `private` section:
+
+    ```
+    TypedDictionary<String, Vector3> mnchar_id_location_dict{
+        {String("0"), Vector3(15, 0, -20)},  {String("1"), Vector3(-15, 0, 20)},
+        {String("2"), Vector3(-20, 0, -15)}, {String("3"), Vector3(20, 0, 15)},
+        {String("4"), Vector3(-5, 0, -20)},  {String("5"), Vector3(5, 0, 20)},
+        {String("6"), Vector3(-20, 0, 5)},   {String("7"), Vector3(20, 0, -5)}};
+
+    TypedDictionary<String, double> mnchar_id_rotation_dict{
+        {String("0"), 0},           {String("1"), Math_PI},
+        {String("2"), Math_PI / 2}, {String("3"), Math_PI / -2},
+        {String("4"), 0},           {String("5"), Math_PI},
+        {String("6"), Math_PI / 2}, {String("7"), Math_PI / -2}};
+
+    TypedDictionary<String, Color> mnchar_id_color_dict{
+        {String("0"), Color(0, 0, 1, 1)}, {String("1"), Color(0, 1, 0, 1)},
+        {String("2"), Color(0, 1, 1, 1)}, {String("3"), Color(1, 0, 0, 1)},
+        {String("4"), Color(1, 0, 1, 1)}, {String("5"), Color(1, 1, 0, 1)},
+        {String("6"), Color(1, 1, 1, 1)}, {String("7"), Color(0, 0, 0, 1)}};
+    ```
+
+    This code is based on references 32 (an overview of Godot's own core types) and 33 (the example.cpp file within the godot-cpp repository). Both of these resources proved very helpful in working with Godot types like TypedDictionary, so I highly recommend checking them out if you aren't already familiar with them. The syntax is also similar to that for `std::map` (see reference 35).
+
+    Each of these dictionaries uses string-based IDs as keys and various initialization settings (namely, starting locations, starting rotations, and colors) as values. The transforms and rotations allow for an adequate amount of space between players while keeping them all facing towards the game area. (I also needed to make sure that no player would begin in another's direct line of fire.)
+
+    The rotation values are in radians; they use the MATH_PI variable found within reference 34. For the rotation dictionary, the fourth value within each 'Color' represents that color's opacity. 
+
+1. Next, we need to update Mnchar::start() in order to utilize these rotation and color variables. Update your `void start()` function within mnchar.h so that it reads:
+
+    ```
+    void start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
+             double mnchar_rotation_arg, Color mnchar_color_arg);
+    ```
+
+1. We'll also need to declare and define a function that can modify a Mnchar's color. Right above `void shoot_projectile();` within the `public` section of mnchar.h, add:
+
+    ```
+    void set_mnchar_color(const Color mnchar_color_arg);
+
+    ```
+
+1. Switch over to mnchar.cpp. Add the following two statements to the end of your `#include` list:
+
+    ```
+    #include <godot_cpp/classes/base_material3d.hpp>
+    #include <godot_cpp/classes/mesh_instance3d.hpp>
+    ```
+1. Then, after your `Mnchar::get_mnchar_id()` definition within mnchar.cpp, define this function as follows:
+
+    ```
+    void Mnchar::set_mnchar_color(const Color mnchar_color_arg) {
+    UtilityFunctions::print("Mnchar::set_mnchar_color() checkpoint 1.");
+    Ref<BaseMaterial3D> mncharbody_mesh_material_3d = (
+        get_node<Node3D>("Pivot")
+            ->get_node<MeshInstance3D>("Body")
+            ->get_mesh()
+            ->surface_get_material(0));
+
+    mncharbody_mesh_material_3d->set_albedo(mnchar_color_arg);
+
+    get_node<Node3D>("Pivot")
+        ->get_node<MeshInstance3D>("Body")
+        ->get_mesh()
+        ->surface_set_material(0, Ref<Material>(mncharbody_mesh_material_3d));
+        }
+    ```
+
+    This code (Based on references 36, 37, 38, and 39--special thanks to RamblingStranger and pescador in the Godot discord for their help here) first retrieves the current material of the Mnchar's Pivot. It then uses `Ref<>` to create a `BaseMaterial3D` copy of this material, as this class has a `set_albedo` method that we can use to convert the existing material to our new color. Finally, it sets the pivot's existing material to a `Material` copy of this BaseMaterial3D. 
+
+    (pescador noted in Discord that "Ref wrappers automatically verify and give you the right type to you", but also clarified that this approach "only works for RefCounted objects." For an alternative approach that may be more flexible, see the `Mnchar::set_character_color()` method within mnchar.cpp in Reference 2.)
+
+    Also note that, for this code to work, the "Pivot" and "Body" names *must* also be present within your scene tree within Mnchar.tscn. If you're using a different name for one of these items, your game will most likely crash before either Mnchar appears (which I know from experience!).
+
+1. Replace the `Mnchar::start()` function definition within mnchar.cpp with the following code:
+
+    ```
+    void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
+                    double mnchar_rotation_arg, Color mnchar_color_arg)
+    {
+    set_mnchar_id(mnchar_id_arg);
+    UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
+    translate(mnchar_translate_arg);
+    set_mnchar_color(mnchar_color_arg);
+    get_node<Node3D>("Pivot")->rotate_object_local(Vector3(0, 1, 0),
+                                                    mnchar_rotation_arg);
+    }
+    ```
+
+    This function will now not only set the Mnchar's ID and starting location, but also update its color and rotation.
+
+1. Next, replace your existing Main::_ready() {} function definition with the following text:
+
+    ```
+    void Main::_ready() {
+
+        UtilityFunctions::print("Main::_ready() just got called.");
+
+        Array players_to_include {"0", "1"};
+        for (int index = 0; index < players_to_include.size(); index++)
+        {
+        String mnchar_id_arg = players_to_include[index];
+        Color mnchar_color_arg = mnchar_id_color_dict[mnchar_id_arg];
+        Vector3 mnchar_translate_arg = mnchar_id_location_dict[mnchar_id_arg];
+        double mnchar_rotation_arg = mnchar_id_rotation_dict[mnchar_id_arg];
+
+        auto new_mnchar = reinterpret_cast<Mnchar *>(
+            get_mnchar_scene()->instantiate());
+        
+        new_mnchar -> start(mnchar_id_arg, mnchar_translate_arg,
+            mnchar_rotation_arg, mnchar_color_arg);
+
+        add_child(new_mnchar);
+        }
+
+    }
+    ```
+
+    We're now adding new Mnchars to the game via a loop that iterates through an array of Mnchar IDs. These IDs are used to specify each player's color, translation, and rotation, all of which (together with the ID) then get passed to our `Mnchar::start()` function.
+
+    The `players_to_include` Array will later get initialized using the keys of a Dictionary (as `Dictionary.keys()` returns an Array), but for now, we'll store hardcoded "0" and "1" values within .
+
+1. Go ahead and compile your code, then launch your main scene within the editor. You should see the following:
+
+    ![](/tutorial_screenshots/two_green_players.png)
+
+    Two players are now present within the game area, as expected. But why are they both green? Was there an issue with our color dictionary? After quite a bit of debugging, I eventually found the solution in a post by Tobias Wink (Reference 40). The problem is that, currently, our Mnchar's material is shared across both of our Mnchar instances; as a result, changing the color of the second Mnchar will also change the first Mnchar's color.
+
+    To resolve this, double-click on your mnchar.tscn scene; click on the 'Body' MeshInstance3D; click the white cube within the Mesh section of the Inspector (not the game) to open the Edit window; open up the Resource section near the bottom; and check the 'Local to Scene' box. Next, click the white sphere within the Material section of the editor; scroll down to and open its own Resource section; and check *that* 'Local to Scene' box as well. After saving your scene and relaunching your game, you should now see one blue cube and one green cube within the game area:
+
+    ![](/tutorial_screenshots/blue_and_green_mnchars.png)
+
+    As the blue player, try firing some projectiles towards the green player by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) 
 
 # Here with editing:
 
-Add color, transform, and rotation dictionaries to main.h; use those to initialize two different characters; and also add in code that updates the colors of Mnchars (and perhaps projectiles, since it will be fresh in the reader's memory at this point) based on mnchar_id values. Then apply these dictonaries when adding new players to the game via main.cpp--though you can still just hardcode the addition of two players at this point.
-
-Don't forget to make materials/meshes local to the scene!
+Update mash/layer values so that projectiles, but not characters, remove players from scenes when they hit them. Also add/connect signals as needed to make this work.
 
 ## Notes for future sections:
 
@@ -1036,3 +1174,21 @@ Notes:
 * Reference 30: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-get-parent
 
 * Reference 31: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-add-child
+
+* Reference 32: https://docs.godotengine.org/en/stable/engine_details/architecture/core_types.html
+
+* Reference 33: https://github.com/godotengine/godot-cpp/blob/master/test/src/example.cpp
+
+* Reference 34: /godot_cpp/core/math_defs.hpp
+
+* Reference 35: https://en.cppreference.com/cpp/container/map
+
+* Reference 36: godot-cpp/gen/include/godot_cpp/classes/mesh_instance3d.hpp
+
+* Reference 37: godot-cpp/gen/include/godot_cpp/classes/material.hpp
+
+* Reference 38: https://discord.com/channels/212250894228652034/342047011778068481/1487545947608322078
+
+* Reference 39: https://discord.com/channels/212250894228652034/342047011778068481/1489038771600101457
+
+* Reference 40: https://www.somethinglikegames.de/en/blog/2023/material-synchronization/
