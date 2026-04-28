@@ -83,6 +83,8 @@ void Main::_ready() {
     add_child(new_mnchar);
 
     active_mnchars.insert(mnchar_id_arg);
+
+
   }
 
   UtilityFunctions::print("Printing out all active players in set:");
@@ -91,4 +93,6 @@ void Main::_ready() {
        ++active_mnchars_iterator) {
     UtilityFunctions::print(*active_mnchars_iterator);
   }
+
+
 }

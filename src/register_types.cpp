@@ -2,6 +2,7 @@
 #include "main.h"
 #include "mnchar.h"
 #include "projectile.h"
+#include "hud.h"
 
 
 #include <gdextension_interface.h>
@@ -18,6 +19,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     GDREGISTER_RUNTIME_CLASS(Main);
     GDREGISTER_RUNTIME_CLASS(Mnchar);
     GDREGISTER_RUNTIME_CLASS(Projectile);
+    GDREGISTER_RUNTIME_CLASS(Hud);
 
 }
 
