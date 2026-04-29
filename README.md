@@ -1489,12 +1489,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 1. Within `void Main::_ready()`'s opening and closing brackets, enter the following lines:
 
     ```
-  get_node<Hud>("Hud")->set_winner_text("Welcome to Cube Combat!\n\n");
+    get_node<Hud>("Hud")->set_winner_text(
+        "Welcome to Cube Combat!\n\n");
 
-  get_node<Hud>("Hud")->set_instructions_text(
-      get_node<Hud>("Hud")->get_instructions());
+    get_node<Hud>("Hud")->set_instructions_text(
+    get_node<Hud>("Hud")->get_instructions());
 
-  get_node<Hud>("Hud")->update_between_game_message();
+    get_node<Hud>("Hud")->update_between_game_message();
     ```
 
 1. This code adds our standard game-instructions text to the Hud's `instructions_text` string, then instructs the Hud code to update our between-game message to include this new text. (We won't always want to display the gameplay instructions, so it's useful to be able to clear them out, which our current setup allows.) It also precedes these instructions with a welcome message. (We'd normally display information here about the previous game's winning player, but since we're just starting the game, we don't have any such game to reference.)
