@@ -855,7 +855,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ![](/tutorial_screenshots/projectile_scene.png)
 
-    ## Part 10: Allowing Mnchars to fire projectiles
+## Part 10: Allowing Mnchars to fire projectiles
 
 1. Next, we'll need to add code for firing projectiles to our Mnchar class. First, within mnchar.h, add the following two lines to the end of your list of `#include` statements:
 
@@ -1070,7 +1070,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     We're now adding new Mnchars to the game via a loop that iterates through an array of Mnchar IDs. These IDs are used to specify each player's color, translation, and rotation, all of which (together with the ID) then get passed to our `Mnchar::start()` function.
 
-    The `mnchars_to_include` Array will later get initialized using the keys of a Dictionary (as `Dictionary.keys()` returns an Array), but for now, we'll store hardcoded "0" and "1" values within .
+    The `mnchars_to_include` Array will eventually get passed to this function, but for now, we'll store hardcoded "0" and "1" values within it..
 
 
 1. Go ahead and compile your code, then restart the editor. Now that we have a second Mnchar within our game, we should add in inputs for this player. Go to Project --> Project Settings --> Input Map to access the input editor.
@@ -1199,7 +1199,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     This way, every Mnchar in the `mnchars_to_include` array will also get added to our list of active players. 
     
-    (I believe we could also have simply used the `mnchars_to_include` array to keep track of our active players; however, I did want to introduce the HashSet type within this tutorial, and this is a great way to do so. Similarly, instead of initializing `mnchars_to_include` later on by retrieving the keys of a Dictionary within a new Hud class, we could have passed an Array from Hud instead; however, I wanted to provide a simple demonstration of the Dictionary class.)
+    (I believe we could also have simply used the `mnchars_to_include` array to keep track of our active players; however, I did want to introduce the HashSet type within this tutorial, and this is a great way to do so.)
 
 
 1. Finally, at the end of `Main::_ready()`, add the following code:
@@ -1301,7 +1301,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     get_tree()->call_group("mnchars", "queue_free");
 
     String new_winner_message = "The winning player \
-    is: " + winning_mnchar_id;
+    is: " + winning_mnchar_id + "\n\n";
 
     UtilityFunctions::print(new_winner_message);
     }
@@ -1370,50 +1370,47 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     static void _bind_methods();
 
-    String instructions = "To join this game, press Fire on \
-        your controller.\nTo launch a game, press both Fire and\nReset \
-        simultaneously.\nTo reset overall stats, hold down Reset\nfor \
-        two seconds.\n\n";
+    const String instructions = "To join this game, press Fire on \
+    your controller. To launch a game, press both Fire and Reset \
+    simultaneously. To reset overall stats, hold down Reset for \
+    two seconds.\n\n";
 
     String winner_text{""};
     String instructions_text{""};
     String entrants_text{""};
 
-    String overall_hits_text{""};
-    String overall_wins_text{""};
+    Array mnchars_to_include {};
 
     public:
-    Dictionary players_to_include;
+    
 
     Hud();
     ~Hud();
 
     String get_instructions();
 
-    void set_winner_text(String winner_arg);
+    void set_winner_text(const String winner_arg);
 
-    void set_instructions_text(String instructions_arg);
+    void set_instructions_text(const String instructions_arg);
 
-    void set_entrants_text(String entrants_arg);
-
-    void set_overall_hits_text(String overall_hits_arg);
-
-    void set_overall_wins_text(String overall_wins_arg);
+    void set_entrants_text(const String entrants_arg);
 
     void update_between_game_message();
-    void update_within_game_message();
 
     void _process(double delta) override;
     };
     ```
 
-    Hud extends Godot's CanvasLayer class. It also defines a number of message components (`winner_message`, `instructions_message`, `entrants_message`, `overall_hits_text`, and `overall_wins_text`) that will serve as the building blocks of between-game and in-game messages. Our approach will be to update these building blocks periodically, then call functions as needed (`update_within_game_message` and `update_between_game_message`) to combine these message components together, then display them
-    via Labels that we'll add within the editor.
+    Hud extends Godot's CanvasLayer class. It also defines a number of message components (`winner_message`, `instructions_message`, and `entrants_message`) that will serve as the building blocks of a between-game message that the HUD will display. Our approach will be to update these building blocks periodically, then call `update_within_game_message()` as needed to combine these message components together. This function will also display this combined message via Labels that we'll add within the editor.
     
     (This surely isn't the only way to go about this task, but by presenting all of these messages together, we avoid having one message block partially cover another, and also decrease the 
     amount of individual Label classes that we'll need to use.)
 
+    Similar code for updating a message that will get displayed *within* games will get added later.
+
     By the way, the `_process` function declared here won't actually override Hud's process function without the `double delta` argument--so you should include it even if you don't actually need to make use of it. (This may be obvious to many of you, but it did trip me up when I was first putting this code together, so I thought I would share it.)
+
+    Note: when defining your `instructions` variable, don't add any space in between the start of lines 2 and onward and the text itself. Otherwise, these spaces will also show up within the in-game text. (See this project's hud.h file for reference if needed.)
     
     (References 48, Reference 8)
 
@@ -1435,22 +1432,14 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     return instructions;
     }
 
-    void Hud::set_winner_text(String winner_arg) { winner_text = winner_arg; }
+    void Hud::set_winner_text(const String winner_arg) { winner_text = winner_arg; }
 
-    void Hud::set_instructions_text(String instructions_arg) {
+    void Hud::set_instructions_text(const String instructions_arg) {
     instructions_text = instructions_arg;
     }
 
-    void Hud::set_entrants_text(String entrants_arg) {
+    void Hud::set_entrants_text(const String entrants_arg) {
     entrants_text = entrants_arg;
-    }
-
-    void Hud::set_overall_hits_text(String overall_hits_arg) {
-    overall_wins_text = overall_hits_arg;
-    }
-
-    void Hud::set_overall_wins_text(String overall_wins_arg) {
-    overall_wins_text = overall_wins_arg;
     }
 
     void Hud::update_between_game_message() {
@@ -1458,53 +1447,272 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
         winner_text + instructions_text + entrants_text;
     }
 
-    void Hud::update_within_game_message() {
-    String within_game_message = overall_hits_text + overall_wins_text;
-    }
-
     void Hud::_process(double delta) {}
     ```
 
-    Note how `update_between_game_message` combines the output of `winner_text`, `instructions_text`, and `entrants_text` into a single string, while `update_within_game_message` combines `overall_hits_text` and `overall_wins_text`. (Since these functions perform the task of retrieving all five text blocks, it wasn't necessary to create separate `get` functions for them.
-
-    We won't use all of these messages right away, and we haven't yet specified how `between_game_message` and `within_game_message` will be displayed, but I wanted to share this code at this point to give you a better sense of my plan for this class.
+    Note how `update_between_game_message` combines the output of `winner_text`, `instructions_text`, and `entrants_text` into a single string. (Since this function performs the task of retrieving all three text blocks, it wasn't necessary to create separate `get` functions for them.)
 
     (Reference 8)
 
 1. Finally, go back into register_types.cpp in order to inform Godot of this new class. You can probably guess at this point which two lines to include, but in case you need a refresher: add `#include "hud.h"` below `#include "projectile.h"` near the top, and `GDREGISTER_RUNTIME_CLASS(Hud);` below `GDREGISTER_RUNTIME_CLASS(Projectile);` within `initialize_example_module()`.
 
-## Part 15: Configuring hud.tscn
+## Part 15: Configuring hud.tscn and extending the Hud class
 
 1. Compile your code, then restart your editor. As you did with your other three scenes, click on Scene --> New Scene; select 'Other Node' within the 'Create Root Node' menu; choose your newly-created Hud class; and then save this scene as hud.tscn. (This will be the last scene that we add within this tutorial.)
 
+1. Add a Label as a child of Hud and rename it 'BetweenGameLabel.' This label, as the name suggests, will display relevant text (e.g. the winner of the previous game, if applicable; instructions for starting a new game; and the players who have been added to the game) in between active games. (Reference 48)
+
+1. Go to BetweenGameLabel's inspector, then expand the Transform section. Set the x and y Position values to 20.0 pixels each in order to create a small buffer between this box and the edge of the game window. Next, set the x Size value to 300.0 pixels. Scroll back up to the Label section, then set the Autowrap Mode to 'Word'. This way, we won't need to set line breaks manually within our message (though we could do so if needed using `\n`).
+
+1. Double-click on main.tscn, then right click over 'Main' and select 'Instantiate Child Scene:.' Double click on your new hud.tscn file to add it to your scene tree.
+
+1. We'll need to handle two different 'out-of-game' scenarios within the Hud: (1) the experience when you first launch the game, and (2) what you see after finishing a game. We'll handle the first scenario first, since it's a bit simpler. Open up main.h, then add the following line right before your `end_game()` function within the script's `public` section:
+
+    ```
+    void _on_hud_start_game(Array mnchars_to_include);
+    ```
+
+1. In addition, add `#include "hud.h"` right below `#include "mnchar.h"` within this script's list of `#include` statements.
+
+1. Next, right before your `Main::end_game()` function definition within main.cpp, add:
+
+    ```
+    void Main::_on_hud_start_game(Array mnchars_to_include)
+    {
+    }
+    ```
+
+    Next, *cut* all of the contents between Main::_ready()'s opening and closing brackets, then *paste* them in between the starting and closing brackets of this new function. (Adding this code within Main::ready() allowed us to automatically launch each game with two players. However, we'll now want to allow code within Hud to specify when the game should be launched and how many Mnchars, exactly, should be included. Thus, it should now be placed within a new function.)
+
+    As the name of this function suggests, we'll eventually connect it to a 'start_game' signal that Hud will emit.
+
+1. Within `void Main::_ready()`'s opening and closing brackets, enter the following lines:
+
+    ```
+  get_node<Hud>("Hud")->set_winner_text("Welcome to Cube Combat!\n\n");
+
+  get_node<Hud>("Hud")->set_instructions_text(
+      get_node<Hud>("Hud")->get_instructions());
+
+  get_node<Hud>("Hud")->update_between_game_message();
+    ```
+
+1. This code adds our standard game-instructions text to the Hud's `instructions_text` string, then instructs the Hud code to update our between-game message to include this new text. (We won't always want to display the gameplay instructions, so it's useful to be able to clear them out, which our current setup allows.) It also precedes these instructions with a welcome message. (We'd normally display information here about the previous game's winning player, but since we're just starting the game, we don't have any such game to reference.)
+
+1. Go back to hud.h, then add `#include <godot_cpp/classes/label.hpp>` right below `#include <godot_cpp/variant/typed_dictionary.hpp>`. Next, within hud.cpp, add the following lines to the bottom of `Hud::update_between_game_message()`:
+
+    ```
+    auto between_game_label = get_node<Label>("BetweenGameLabel");
+    between_game_label -> set_text(between_game_message);
+    ```
+
+    (Reference 8)
+
+1. Compile your game, restart your editor, and launch your main scene. The BetweenGameLabel should now display the `between_game_message` you just configured in the top right.
+
+    ![](/tutorial_screenshots/new_game_message.png)
+
+1. These instructions aren't correct yet, since we haven't added the corresponding code that will make them valid. Let's work on adding that code now. First, within hud.h, add `#include <godot_cpp/classes/input.hpp>` to the bottom of your list of `#include` statements. Next, fill in your `Hud::_process()` function within hud.cpp with the following code:
+
+    ```
+    auto input = Input::get_singleton();
+
+    for (int i = 0; i < 8; i++)
+
+        {
+
+            String strint = String::num_int64(i);
+            if (
+            (input->is_action_just_pressed("fire_" + strint)) && 
+            (mnchars_to_include.has(strint) == false)
+            )
+
+            {        
+            UtilityFunctions::print("Adding player " + strint + " to the game.");
+            mnchars_to_include.append(strint);
+            
+            }
+
+            if ((input->is_action_pressed("fire_" + strint)) &&
+                (input->is_action_pressed("reset_" + strint)))
+                {UtilityFunctions::print("New game requested. Players:", 
+                mnchars_to_include);
+                
+                instructions_text = "";
+                winner_text = "";
+                entrants_text = "";
+                update_between_game_message();
+
+                emit_signal("start_game", mnchars_to_include);            
+                }
+    }
+    ```
+
+    This loop checks for relevant inputs from all eight possible players (with corresponding IDs of 0 through 7), then responds accordingly. When players request to get added to the game (by pressing their respective Fire buttons), they'll get added to the `mnchars_to_include` array--provided their IDs aren't already present within there.
+
+    Once a player presses both the Fire and Reset button, the between-message text will get cleared (since we won't need this message when a game is in progress), and a "start_game" signal will get emitted. 
+    
+    (References 8 and 49)
+
+1. Within Hud::_bind_methods() {} in hud.cpp, add:
+
+    ```
+    ADD_SIGNAL(MethodInfo(
+        "start_game", PropertyInfo(Variant::ARRAY, "mnchars_to_include")));
+    ```
+
+    This signal will soon get processed by main.cpp's `_on_hud_start_game` function. By the way, if you need to check how to specify a given Variant within the PropertyInfo section of an ADD_SIGNAL() call, you can check the godot-cpp code's variant.hpp file (reference 50), which includes types like Variant:ARRAY and Variant:DICTIONARY.)
+
+    (References 1 and 50)
+    
+
+1. Relaunch your game, then press keys 1 through 7 on your keyboard followed by the Space Bar. (These were configured within your input settings to represent 'fire' actions for each possible player. Use the keys above your letters rather than the number pad.) Next, press both the Space Bar and R to request a new game. This should produce output like the following within your console:
+
+    ```
+    Adding player 1 to the game.
+    Adding player 2 to the game.
+    Adding player 3 to the game.
+    Adding player 4 to the game.
+    Adding player 5 to the game.
+    Adding player 6 to the game.
+    Adding player 7 to the game.
+    Adding player 0 to the game.
+    New game requested. Players:["1", "2", "3", "4", "5", "6", "7", "0"]
+    ```
+
+1. We'll now allow the new-game request within `Hud::_process()` to actually start a game. Within main.cpp, add the following to the start of `Main::_ready()`:
+
+    ```
+    get_node<Hud>("Hud")->connect("start_game",
+        Callable(this, "_on_hud_start_game"));
+    ```
+
+    (This could also be accomplished within the Godot editor.)
+
+    Note that, while we needed to include the `mnchars_to_include` argument within our recent ADD_SIGNAL() edition within main.h, it doesn't need to be mentioned within this `connect()` function call.
+
+    (Reference 1)
+
+1. Next, at the end `Main::_bind_methods()` within main.cpp, add:
+
+    ```
+    ClassDB::bind_method(D_METHOD("_on_hud_start_game"),
+                        &Main::_on_hud_start_game);
+    ```
+
+    (Without this addition, your Hud class's `start_game` signal won't actually call your Main class's `_on_hud_start_game()` function.)
+
+1. Finally, at the very beginning of `Main::_on_hud_start_game()`, add the following code:
+
+    ```
+    get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_DISABLED);
+    ```
+
+    This line stops Hud's `_process` script from running. That way, within-game player actions won't have any effect on that script. (Alternatively, if we needed `_process` to continue running, we could have added a `can_launch_new_game` flag that would instruct the `_process` script to skip past the loop we specified earlier. See my hud.cpp code within Reference 2 for an example. This tutorial's code, though, is far more readable and less cluttered than that version.)
+
+    (References 51 and 52)
+
+1. Compile your code, restart your editor, and launch your game. Press keys 1-7 on your keyboard, along with the space bar, to add all 8 Mnchars to your game; next, press Space Bar and R at the same time to launch it. You should now see the following:
+
+    ![](/tutorial_screenshots/launching_8_player_game.png)
+
+## Part 16: Handling end-of-game tasks
+
+1. We can now launch our game with an arbitrary number of players. However, we now need to allow players to return to the game-setup menu once a game is complete.
+
+1. First, within hud.h, add `void clear_mnchars_to_include();` right before `void _process()` within this script's `public` section. Next, right before `void Hud::_prcocess()` within hud.cpp, define this new function as follows:
+
+    ```
+    void Hud::clear_mnchars_to_include() {
+    mnchars_to_include.clear();}
+    ```
+
+    This function resets the `mnchars_to_include` array, thus allowing players to leave the game before a new round begins.
+
+    (Reference 49)
+
+1. Within the Godot editor, add a Timer as a child of Main and name it 'HudProcessTimer.' We'll use this timer to give players time to review the winner of the previous game before restarting Hud's `_process()` function. (This timer will also prevent players from accidentally adding themselves to a new game in the process of finishing their previous one, since the fire and player-addition actions will use the same button.) 
+
+    Within the HudProcessTimer's Inspector, set the Wait Time to 2 seconds and the One Shot option to on. (The latter will prevent the timer from restarting after it counts down to 0.)
+
+    (By the way: I had originally made this timer a member of Hud. However, I wasn't able to get that code to work--perhaps because, when the Hud node was disabled, timer-related code wouldn't work correctly.)
+
+    (Reference 48)
+
+1. In main.h, add `#include <godot_cpp/classes/timer.hpp>` to the end of your list of `#include` statements.
+
+1. In main.cpp, add the following text to the bottom of `Main::end_game()`:
+
+    ```
+    get_node<Hud>("Hud")->set_winner_text(new_winner_message);
+    get_node<Hud>("Hud")->update_between_game_message();
+    get_node<Timer>("HudProcessTimer")->start();
+    ```
+
+    This code allows players to see the ID of the winning Mnchar within the UI. (We'll add updates later on to make this ID easier to interpret.) In addition, it begins the two-second timer that we just created within our Main scene.
+
+    If you'd like, you can also remove the `
+    UtilityFunctions::print(new_winner_message);` line, since it's now redundant.
+
+    (References 53 and 54)
+
+1. Back within main.h, insert `#include <godot_cpp/classes/timer.hpp>` at the end of your list of `#include` statements. Next, add `void _on_hud_process_timer_timeout();` right before `void _ready()` within this file's `public` section.
+
+1. Within main.cpp, add the following code right before `Main::_ready()`:
+
+    ```
+    void Main::_on_hud_process_timer_timeout() {
+    get_node<Hud>("Hud")->clear_mnchars_to_include();
+    get_node<Hud>("Hud")->set_instructions_text(
+    get_node<Hud>("Hud")->get_instructions());
+    get_node<Hud>("Hud")->update_between_game_message();
+    get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_ALWAYS);
+    }
+    ```
+
+
+    `_on_hud_process_timer_timeout` resets the Hud's list of players to include; makes the instructions text visible again; and reactivates the Hud class's `_process` function. 
+
+1. Next, add the following code at the very start of `Main::_ready()`:
+
+    ```
+    void Main::_ready() {
+    get_node<Timer>("HudProcessTimer")->connect(
+    "timeout", Callable(this, "_on_hud_process_timer_timeout"));
+    }
+
+    ```
+
+    This code addition connects the timer's built-in `timeout()` signal to the `_on_hud_process_timer_timeout` function. (This `timeout()` signal can be found within the Signals tab when the HudProcessTimer is selected within the Godot editor.)
+
+
+1. We'll also need to register `_on_hud_process_timer_timeout` within main.cpp's `_bind_methods()` function so that the signal-connection code within `_ready()` works. You can do so by adding the following code to the bottom of this function:
+
+    ```
+    ClassDB::bind_method(D_METHOD(
+    "_on_hud_process_timer_timeout"), &Main::_on_hud_process_timer_timeout);
+    ```
+
+1. Compile your code, restart the editor, and launch your game. Try adding some players to the game, then clear all but one player out in order to end it. Once the game ends, you should see the a message about the winning player (but no other text). *Then*, after 2 seconds, you should see the game's instructions and regain the ability to add players.
+
+    ![](/tutorial_screenshots/updated_between_game_text.png)
+
+    We're not far from finishing the game at this point! However, we still need to add a few more UI elements, including running overall stats totals--and allow players to reset both those stats totals and active games.
+
+## Part 17: Further expanding our UI
+
 # Here with editing:
 
-* Set up your HUD/Main dialog as follows:
+1. Display which players have been added to a game.
 
-1. Create two labels--one for your between-game message, and another for your within-game message. Also create a two-second timer called 'instructions_timer'.
+2. Display stats at the close of a game within the winner message--and also store/display overall stats.
 
-1. When Main::ready() is called, call `set_instructions_text` and pass `instructions` to it, then run `update_within_game_message()`. The process function will already be running, so there won't be any need to wait two seconds in order for instructions_timer to deplete and for players to begin joining the game. (Move your existing `_ready()` code to a new `start_game()` function that will only get called once Main receives a signal from Hud.)
-
-1. Whenever a player gets added, update your 'between-game' Label with your `between_game_message` accordingly. (This will involve updating `set_entrants_text`, or just `entrants_text`, accordingly. Actually, you probably won't need `set_entrants_text` anyway--so you could consider removing it from the script.) 
-
-1. Once a player starts the game, emit a `start_game` signal that main.cpp can pick up within an `_on_hud_start_game()` function. (Make sure to connect this signal within `main::ready()` beforehand. This `_on_hud_start_game` function should first call `get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_DISABLED)` so that Hud's process() function stops running. It should then (1) set the winner, instructions, and entrants text to empty strings, then (2) call `update_between_game_message` in order to effectively hide it. (It can then add the new players specified within the Dictionary that Hud passed to it.)
-
-1. When end_game is called, call `set_winner_text` to specify the winner and other related stats, then launch the 2-second instructions_timer within Hud that gives readers time to review this message. Have this timer send out a signal once it runs out, then connect this signal within Hud to a 'launch_process()` function. Have `launch_process()` (1) call `set_instructions_text()` with your `instructions` String (or simply update `instructions_text` directly); (2) call `update_within_game_message` to show this new text; and (3) run `set_process_mode(PROCESS_MODE_ALWAYS)`. That way, players will be able to add themselves to the game.
-
-1. If you have any trouble getting the timer setup to work, you can also simply set a float to 0 when process() is restarted, then wait for this value to reach 2 before displaying instructions and accepting commands (similar to your approach within godot_cpp_3d_demo).
-
-1. Note: the set_process_mode(PROCESS_MODE_DISABLED) and set_process_mode(PROCESS_MODE_ALWAYS) code was based on:
-
-1. https://docs.godotengine.org/en/stable/tutorials/scripting/pausing_games.html 
-
-2. godot-cpp/gen/include/godot_cpp/classes/node.hpp
-
-3. godot-cpp/gen/include/godot_cpp/classes/node.hpp
+3. Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.)
 
 
 ## Future editing notes
 
-1. Try making as many items `const` as possible.
+1. Try to make as many items `const` as possible.
 
 
 ## References
@@ -1618,3 +1826,15 @@ Notes:
 * Reference 47: https://github.com/kburchfiel/godot_cpp_3d_demo/tree/main/input_map_creator
 
 * Reference 48: https://docs.godotengine.org/en/4.6/getting_started/first_2d_game/06.heads_up_display.html
+
+* Reference 49: /godot-cpp/gen/src/variant/array.hpp
+
+* Reference 50: /godot-cpp/include/godot_cpp/variant/variant.hpp
+
+* Reference 51: https://docs.godotengine.org/en/stable/tutorials/scripting/pausing_games.html 
+
+* Reference 52: godot-cpp/gen/include/godot_cpp/classes/node.hpp
+
+* Reference 53: https://docs.godotengine.org/en/stable/classes/class_timer.html
+
+* Reference 54: /godot-cpp/gen/include/godot_cpp/classes/timer.hpp

@@ -1,3 +1,10 @@
 [gd_scene format=3 uid="uid://be4n837rrcrja"]
 
 [node name="Hud" type="Hud" unique_id=1316853346]
+
+[node name="BetweenGameLabel" type="Label" parent="." unique_id=1863021425]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 43.0
+autowrap_mode = 2

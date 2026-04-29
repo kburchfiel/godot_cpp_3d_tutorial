@@ -13,6 +13,12 @@ void Main::_bind_methods() {
 
   ClassDB::bind_method(D_METHOD("_on_mnchar_mnchar_hit", "hit_mnchar_id_arg"),
                        &Main::_on_mnchar_mnchar_hit);
+
+  ClassDB::bind_method(D_METHOD("_on_hud_start_game"),
+                       &Main::_on_hud_start_game);
+
+  ClassDB::bind_method(D_METHOD("_on_hud_process_timer_timeout"),
+                       &Main::_on_hud_process_timer_timeout);
 }
 
 Main::Main() {}
@@ -36,8 +42,7 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
   UtilityFunctions::print("Current size of active_mnchars: ",
                           active_mnchars.size());
 
-  if (active_mnchars.size() == 1)
-  {
+  if (active_mnchars.size() == 1) {
     String winning_mnchar = *active_mnchars.begin();
     end_game(winning_mnchar);
   }
@@ -47,29 +52,17 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
   }
 }
 
-void Main::end_game(String winning_mnchar_id) {
-  get_tree()->call_group("mnchars", "queue_free");
+void Main::_on_hud_start_game(Array mnchars_to_include) {
 
-  String new_winner_message = "The winning player \
-is: " + winning_mnchar_id;
-
-  UtilityFunctions::print(new_winner_message);
-}
-
-void Main::_ready() {
+  get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_DISABLED);
 
   active_mnchars.clear();
-
-  Array mnchars_to_include{"0", "1"};
 
   for (int index = 0; index < mnchars_to_include.size(); index++) {
 
     String mnchar_id_arg = mnchars_to_include[index];
-    // UtilityFunctions::print("Main::_ready() Checkpoint 3.");
     Color mnchar_color_arg = mnchar_id_color_dict[mnchar_id_arg];
-    // UtilityFunctions::print("Main::_ready() Checkpoint 4.");
     Vector3 mnchar_translate_arg = mnchar_id_location_dict[mnchar_id_arg];
-    // UtilityFunctions::print("Main::_ready() Checkpoint 5.");
     double mnchar_rotation_arg = mnchar_id_rotation_dict[mnchar_id_arg];
 
     auto new_mnchar =
@@ -83,8 +76,6 @@ void Main::_ready() {
     add_child(new_mnchar);
 
     active_mnchars.insert(mnchar_id_arg);
-
-
   }
 
   UtilityFunctions::print("Printing out all active players in set:");
@@ -93,6 +84,39 @@ void Main::_ready() {
        ++active_mnchars_iterator) {
     UtilityFunctions::print(*active_mnchars_iterator);
   }
+}
 
+void Main::end_game(String winning_mnchar_id) {
+  get_tree()->call_group("mnchars", "queue_free");
 
+  String new_winner_message = "The winning player \
+is: " + winning_mnchar_id + "\n\n";
+
+  get_node<Hud>("Hud")->set_winner_text(new_winner_message);
+  get_node<Hud>("Hud")->update_between_game_message();
+  get_node<Timer>("HudProcessTimer")->start();
+}
+
+void Main::_on_hud_process_timer_timeout() {
+  get_node<Hud>("Hud")->clear_mnchars_to_include();
+  get_node<Hud>("Hud")->set_instructions_text(
+      get_node<Hud>("Hud")->get_instructions());
+  get_node<Hud>("Hud")->update_between_game_message();
+  get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_ALWAYS);
+}
+
+void Main::_ready() {
+
+  get_node<Timer>("HudProcessTimer")
+      ->connect("timeout", Callable(this, "_on_hud_process_timer_timeout"));
+
+  get_node<Hud>("Hud")->connect("start_game",
+                                Callable(this, "_on_hud_start_game"));
+
+  get_node<Hud>("Hud")->set_winner_text("Welcome to Cube Combat!\n\n");
+
+  get_node<Hud>("Hud")->set_instructions_text(
+      get_node<Hud>("Hud")->get_instructions());
+
+  get_node<Hud>("Hud")->update_between_game_message();
 }

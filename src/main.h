@@ -2,12 +2,14 @@
 
 #pragma once
 #include "mnchar.h"
+#include "hud.h"
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
 #include <godot_cpp/core/math_defs.hpp>
 #include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/timer.hpp>
 
 using namespace godot;
 
@@ -50,7 +52,11 @@ public:
   void _on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
                              String firing_mnchar_id_arg);
 
+  void _on_hud_start_game(Array mnchars_to_include);
+
   void end_game(String winning_mnchar_id);
+
+void _on_hud_process_timer_timeout();
 
   void _ready();
 };

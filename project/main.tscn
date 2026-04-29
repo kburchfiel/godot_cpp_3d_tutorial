@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cw67eabxv1bb5"]
 
-[ext_resource type="PackedScene" uid="uid://c8dgny737ctoe" path="res://mnchar.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://c8dgny737ctoe" path="res://mnchar.tscn" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://be4n837rrcrja" path="res://hud.tscn" id="1_ig7tw"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
 size = Vector3(60, 1, 60)
@@ -12,7 +13,7 @@ albedo_color = Color(0.1254902, 0.5019608, 0.2509804, 1)
 material = SubResource("StandardMaterial3D_7dm0k")
 
 [node name="Main" type="Main" unique_id=1942144727]
-packed_scene = ExtResource("1_ig7tw")
+packed_scene = ExtResource("1_0xm2m")
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1821615201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -33,3 +34,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, -40)
 
 [node name="Camera3D" type="Camera3D" parent="Marker3D" unique_id=622031397]
 transform = Transform3D(-1, 6.181724e-08, -6.181724e-08, 0, 0.70710677, 0.70710677, 8.742278e-08, 0.70710677, -0.70710677, 0, 0, 0)
+
+[node name="Hud" parent="." unique_id=1316853346 instance=ExtResource("1_ig7tw")]
+
+[node name="HudProcessTimer" type="Timer" parent="." unique_id=443314601]
+wait_time = 2.0
+one_shot = true
