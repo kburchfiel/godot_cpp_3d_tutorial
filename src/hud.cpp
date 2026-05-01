@@ -51,6 +51,10 @@ void Hud::clear_mnchars_to_include() {
 //   String within_game_message = overall_hits_text + overall_wins_text;
 // }
 
+void Hud::set_can_launch_new_game(bool can_launch_new_game_arg) {
+can_launch_new_game = can_launch_new_game_arg;
+}
+
 void Hud::_process(double delta) {
 
 auto input = Input::get_singleton();
@@ -72,7 +76,8 @@ for (int i = 0; i < 8; i++)
         }
 
         if ((input->is_action_pressed("fire_" + strint)) &&
-            (input->is_action_pressed("reset_" + strint)))
+            (input->is_action_pressed("reset_" + strint)) &&
+            (can_launch_new_game == true))
             {UtilityFunctions::print("New game requested. Players:", 
             mnchars_to_include);
             
@@ -80,6 +85,7 @@ for (int i = 0; i < 8; i++)
               winner_text = "";
               entrants_text = "";
               update_between_game_message();
+              can_launch_new_game = false;
 
               emit_signal("start_game", mnchars_to_include);            
             }

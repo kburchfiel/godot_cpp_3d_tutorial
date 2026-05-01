@@ -15,6 +15,7 @@ private:
   bool reset;
   Size2 screenSize;
   static void _bind_methods();
+  
 
   const String instructions = "To join this game, press Fire on \
 your controller. To launch a game, press both Fire and Reset \
@@ -29,6 +30,8 @@ two seconds.\n\n";
 
   // String overall_hits_text{""};
   // String overall_wins_text{""};
+
+  bool can_launch_new_game = true;
 
 public:
   Hud();
@@ -46,10 +49,14 @@ public:
 
   // void set_overall_wins_text(const String overall_wins_arg);
 
-  void update_between_game_message();
+
   // void update_within_game_message();
 
   void clear_mnchars_to_include();
+
+  void update_between_game_message();
+
+  void set_can_launch_new_game(bool can_launch_new_game_arg);
 
   void _process(double delta) override;
 };

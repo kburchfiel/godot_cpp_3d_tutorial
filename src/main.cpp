@@ -94,6 +94,7 @@ is: " + winning_mnchar_id + "\n\n";
 
   get_node<Hud>("Hud")->set_winner_text(new_winner_message);
   get_node<Hud>("Hud")->update_between_game_message();
+
   get_node<Timer>("HudProcessTimer")->start();
 }
 
@@ -102,6 +103,7 @@ void Main::_on_hud_process_timer_timeout() {
   get_node<Hud>("Hud")->set_instructions_text(
       get_node<Hud>("Hud")->get_instructions());
   get_node<Hud>("Hud")->update_between_game_message();
+  get_node<Hud>("Hud")->set_can_launch_new_game(true);
   get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_ALWAYS);
 }
 

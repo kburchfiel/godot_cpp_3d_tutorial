@@ -1381,6 +1381,8 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     Array mnchars_to_include {};
 
+    bool can_launch_new_game = true;
+
     public:
     
 
@@ -1397,6 +1399,8 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     void update_between_game_message();
 
+    void set_can_launch_new_game(bool can_launch_new_game_arg);
+
     void _process(double delta) override;
     };
     ```
@@ -1408,7 +1412,9 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     Similar code for updating a message that will get displayed *within* games will get added later.
 
-    By the way, the `_process` function declared here won't actually override Hud's process function without the `double delta` argument--so you should include it even if you don't actually need to make use of it. (This may be obvious to many of you, but it did trip me up when I was first putting this code together, so I thought I would share it.)
+    By the way, the `_process` function declared here won't actually override Hud's process function without the `double delta` argument--so you should include it even if you don't actually need to make use of that parameter. (This may be obvious to many of you, but it did trip me up when I was first putting this code together, so I thought I would share it.)
+
+    The `can_launch_new_game` variable will be used to help ensure that a new game is not started multiple times in a row by our Hud's `_process()` function.
 
     Note: when defining your `instructions` variable, don't add any space in between the start of lines 2 and onward and the text itself. Otherwise, these spaces will also show up within the in-game text. (See this project's hud.h file for reference if needed.)
     
@@ -1445,6 +1451,10 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     void Hud::update_between_game_message() {
     String between_game_message =
         winner_text + instructions_text + entrants_text;
+    }
+
+    void Hud::set_can_launch_new_game(bool can_launch_new_game_arg) {
+    can_launch_new_game = can_launch_new_game_arg;
     }
 
     void Hud::_process(double delta) {}
@@ -1535,7 +1545,8 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
             }
 
             if ((input->is_action_pressed("fire_" + strint)) &&
-                (input->is_action_pressed("reset_" + strint)))
+                (input->is_action_pressed("reset_" + strint)) &&
+            (can_launch_new_game == true))
                 {UtilityFunctions::print("New game requested. Players:", 
                 mnchars_to_include);
                 
@@ -1543,7 +1554,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
                 winner_text = "";
                 entrants_text = "";
                 update_between_game_message();
-
+                can_launch_new_game = false;
                 emit_signal("start_game", mnchars_to_include);            
                 }
     }
@@ -1551,7 +1562,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     This loop checks for relevant inputs from all eight possible players (with corresponding IDs of 0 through 7), then responds accordingly. When players request to get added to the game (by pressing their respective Fire buttons), they'll get added to the `mnchars_to_include` array--provided their IDs aren't already present within there.
 
-    Once a player presses both the Fire and Reset button, the between-message text will get cleared (since we won't need this message when a game is in progress), and a "start_game" signal will get emitted. 
+    Once a player presses both the Fire and Reset button, the between-message text will get cleared (since we won't need this message when a game is in progress), and a "start_game" signal will get emitted. However, these steps will only be taken if our `can_launch_new_game` bool is set to true.
     
     (References 8 and 49)
 
@@ -1594,7 +1605,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     (Reference 1)
 
-1. Next, at the end `Main::_bind_methods()` within main.cpp, add:
+1. Next, at the end of `Main::_bind_methods()` within main.cpp, add:
 
     ```
     ClassDB::bind_method(D_METHOD("_on_hud_start_game"),
@@ -1650,7 +1661,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     get_node<Timer>("HudProcessTimer")->start();
     ```
 
-    This code allows players to see the ID of the winning Mnchar within the UI. (We'll add updates later on to make this ID easier to interpret.) In addition, it begins the two-second timer that we just created within our Main scene.
+    This code allows players to see the ID of the winning Mnchar within the UI. (We'll add updates later on to make this ID easier to interpret.) In addition, it begins the two-second timer that we just created within our Main scene. 
 
     If you'd like, you can also remove the `
     UtilityFunctions::print(new_winner_message);` line, since it's now redundant.
@@ -1667,12 +1678,15 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     get_node<Hud>("Hud")->set_instructions_text(
     get_node<Hud>("Hud")->get_instructions());
     get_node<Hud>("Hud")->update_between_game_message();
+    get_node<Hud>("Hud")->set_can_launch_new_game(true);
     get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_ALWAYS);
     }
     ```
 
 
-    `_on_hud_process_timer_timeout` resets the Hud's list of players to include; makes the instructions text visible again; and reactivates the Hud class's `_process` function. 
+    `_on_hud_process_timer_timeout` resets the Hud's list of players to include; makes the instructions text visible again; and reactivates the Hud class's `_process` function. It also sets the Hud class's `can_launch_new_game` variable back to true so that a player can once again launch a new game by holding down the Fire and Reset buttons.
+
+    (Note: The code may very well function fine without the `can_launch_new_game` variable. I added it in just in case the Hud class's `_process` function might continue to emit a `start_game` signal before that function gets shut down by the Main class.) 
 
 1. Next, add the following code at the very start of `Main::_ready()`:
 
@@ -1703,6 +1717,8 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 ## Part 17: Further expanding our UI
 
 # Here with editing:
+
+1. Define the set_can_launch_new_game function within hud.h, then update your main::start_game function to set this to true. Add more notes about why you're adding this in (e.g. to ensure that, even if the Hud process loop keeps running for a little while after a start-game command is called, additional players won't be added to the game.)
 
 1. Display which players have been added to a game.
 
