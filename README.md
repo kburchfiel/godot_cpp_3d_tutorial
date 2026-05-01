@@ -1716,15 +1716,89 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 17: Further expanding our UI
 
+1. Right now, we're referring to players using integers. However, these numbers won't make much sense to players on their own. Therefore, we'll add in a dictionary that allows players' colors to be displayed together with their IDs.
+
+1. First, at the end of your `private` section within hud.h, add the following code:
+
+    ```
+        const TypedDictionary<String, String> mnchar_id_color_name_dict{
+        {String("0"), "Blue"},  {String("1"), "Green"},   {String("2"), "Cyan"},
+        {String("3"), "Red"},   {String("4"), "Magenta"}, {String("5"), "Yellow"},
+        {String("6"), "White"}, {String("7"), "Black"}};
+    ```
+
+    This dictionary clarifies which player color refers to which ID. (Each ID's color name should of course match its corresponding color value within the Main class's `mnchar_id_color_dict`.)
+
+1. In addition, right after `~Hud();` within hud.h's `public` section, add:
+
+    ```
+    TypedDictionary<String, String> get_mnchar_id_color_name_dict();
+    ```
+
+    This will allow the Main class to retrieve this new dictionary. (We could also simply have made this dictionary public.)
+
+1. Within hud.cpp, add the following function right before `String Hud::get_instructions()`:
+
+    ```
+    TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() {
+    return mnchar_id_color_name_dict;
+    }
+    ```
+
+    (I had originally forgotten to add in this definition, which prevented Godot from successfully retrieving my classes within the editor. Adding the definition back in, compiling my code, and restarting Godot solved this issue.)
+
+
+1. Still within hud.cpp, add the following right after `mnchars_to_include.append(strint)` within `Hud::_process()`'s first `if` statement:
+
+    ```
+    entrants_text += "Added Player " + strint + " (" +
+                    String(mnchar_id_color_name_dict[strint]) +
+                    ") to the game.\n";
+    update_between_game_message();
+    ```
+
+    This will not only help players link IDs and colors, but also notify them when a particular player has been added to the game.
+
+1. We can also use this ID-color name dictionary to improve our game-winner message. Within main.cpp, go to your `Main::end_game()` function. Replace the following code:
+
+    ```  String new_winner_message = "The winning player \
+    is: " + winning_mnchar_id + "\n\n";
+    ```
+
+    With the following:
+
+    ```
+    String new_winner_message = "The winning player \
+    is: " + winning_mnchar_id;
+
+    if (winning_mnchar_id != "Nobody")
+    {
+    new_winner_message +=
+        " (" +
+        String(get_node<Hud>("Hud")
+                   ->get_mnchar_id_color_name_dict()[
+      winning_mnchar_id]) + ")";
+    }
+
+    new_winner_message += "\n\n";
+    ```
+
+    This code accounts for the possibility that two players will hit each other at exactly the same time, in which case no one will be the winner.
+
+1. Compile your code, restart the Godot editor, and launch the game. You should now be able to see a list of entrants within the text that appears prior to the start of a new game. (This list will also get updated automatically whenever a new player gets added. In addition, the colors corresponding to these entrants' IDs, along with the winner's ID, will now be present within the between-game display.)
+
+    ![](/tutorial_screenshots/mnchar_id_color_updates.png)
+
+
+
+
+
+
 # Here with editing:
 
-1. Define the set_can_launch_new_game function within hud.h, then update your main::start_game function to set this to true. Add more notes about why you're adding this in (e.g. to ensure that, even if the Hud process loop keeps running for a little while after a start-game command is called, additional players won't be added to the game.)
+1. Display stats at the close of a game within the winner message--and also store/display overall stats. (This will involve adding hits, overall hits, and overall wins dictionaries to your Main class--and maybe your Mnchar class too?)
 
-1. Display which players have been added to a game.
-
-2. Display stats at the close of a game within the winner message--and also store/display overall stats.
-
-3. Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.)
+1. Create ## Part 18: Allowing players to reset the game (and overall stats). Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.) This will involve creating a few additional dictionaries.
 
 
 ## Future editing notes

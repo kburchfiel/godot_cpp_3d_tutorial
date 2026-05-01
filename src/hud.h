@@ -33,11 +33,20 @@ two seconds.\n\n";
 
   bool can_launch_new_game = true;
 
+    const TypedDictionary<String, String> mnchar_id_color_name_dict{
+      {String("0"), "Blue"},  {String("1"), "Green"},   {String("2"), "Cyan"},
+      {String("3"), "Red"},   {String("4"), "Magenta"}, {String("5"), "Yellow"},
+      {String("6"), "White"}, {String("7"), "Black"}};
+
+
 public:
   Hud();
   ~Hud();
 
+  TypedDictionary<String, String> get_mnchar_id_color_name_dict();
+
   String get_instructions();
+
 
   void set_winner_text(const String winner_arg);
 

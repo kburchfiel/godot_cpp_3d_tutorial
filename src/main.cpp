@@ -90,7 +90,20 @@ void Main::end_game(String winning_mnchar_id) {
   get_tree()->call_group("mnchars", "queue_free");
 
   String new_winner_message = "The winning player \
-is: " + winning_mnchar_id + "\n\n";
+is: " + winning_mnchar_id;
+
+  if (winning_mnchar_id != "Nobody") // Will be true if (1) a game
+  // was reset or (2) the final two players were hit at the exact
+  // same time
+  {
+    new_winner_message +=
+        " (" +
+        String(get_node<Hud>("Hud")
+                   ->get_mnchar_id_color_name_dict()[
+      winning_mnchar_id]) + ")";
+  }
+
+  new_winner_message += "\n\n";
 
   get_node<Hud>("Hud")->set_winner_text(new_winner_message);
   get_node<Hud>("Hud")->update_between_game_message();
