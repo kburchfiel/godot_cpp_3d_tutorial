@@ -39,6 +39,14 @@ private:
 
   HashSet<String> active_mnchars{};
 
+  TypedDictionary<String, int> hits_achieved{};
+
+  TypedDictionary<String, int> overall_hits_achieved{};
+
+  TypedDictionary<String, int> overall_wins{};
+
+  TypedDictionary<String, String> mnchar_id_color_name_dict{};
+
 protected:
   static void _bind_methods();
 

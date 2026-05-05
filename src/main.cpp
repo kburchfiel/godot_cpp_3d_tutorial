@@ -36,14 +36,27 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
   UtilityFunctions::print("The Mnchar with an ID of ", hit_mnchar_id_arg,
                           " was just hit by the Mnchar with an ID of ",
                           firing_mnchar_id_arg, ".");
+
+  int current_hit_value = hits_achieved[firing_mnchar_id_arg];
+  current_hit_value += 1;
+  hits_achieved[firing_mnchar_id_arg] = current_hit_value;
+
+  int current_overall_hit_value = overall_hits_achieved[firing_mnchar_id_arg];
+  current_overall_hit_value += 1;
+  overall_hits_achieved[firing_mnchar_id_arg] = current_overall_hit_value;
+
   active_mnchars.erase(hit_mnchar_id_arg);
-  // See godot-cpp/include/godot_cpp/templates/hash_set.hpp
 
   UtilityFunctions::print("Current size of active_mnchars: ",
                           active_mnchars.size());
 
   if (active_mnchars.size() == 1) {
     String winning_mnchar = *active_mnchars.begin();
+
+    int current_overall_win_value = overall_wins[winning_mnchar];
+    current_overall_win_value += 1;
+    overall_wins[winning_mnchar] = current_overall_win_value;
+
     end_game(winning_mnchar);
   }
 
@@ -57,6 +70,8 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
   get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_DISABLED);
 
   active_mnchars.clear();
+
+  hits_achieved = TypedDictionary<String, int>{};
 
   for (int index = 0; index < mnchars_to_include.size(); index++) {
 
@@ -76,6 +91,18 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
     add_child(new_mnchar);
 
     active_mnchars.insert(mnchar_id_arg);
+
+    hits_achieved[mnchar_id_arg] = 0;
+
+    if (overall_hits_achieved.has(mnchar_id_arg) == false)
+
+    {
+      overall_hits_achieved[mnchar_id_arg] = 0;
+    }
+
+    if (overall_wins.has(mnchar_id_arg) == false) {
+      overall_wins[mnchar_id_arg] = 0;
+    }
   }
 
   UtilityFunctions::print("Printing out all active players in set:");
@@ -92,18 +119,30 @@ void Main::end_game(String winning_mnchar_id) {
   String new_winner_message = "The winning player \
 is: " + winning_mnchar_id;
 
-  if (winning_mnchar_id != "Nobody") // Will be true if (1) a game
-  // was reset or (2) the final two players were hit at the exact
-  // same time
-  {
+  if (winning_mnchar_id != "Nobody") {
     new_winner_message +=
-        " (" +
-        String(get_node<Hud>("Hud")
-                   ->get_mnchar_id_color_name_dict()[
-      winning_mnchar_id]) + ")";
+        " (" + String(mnchar_id_color_name_dict[
+  winning_mnchar_id]) + ")";
   }
 
   new_winner_message += "\n\n";
+
+  Array hits_achieved_keys = hits_achieved.keys();
+
+  for (int key_index = 0; key_index < hits_achieved_keys.size(); key_index++)
+
+  {
+    String mnchar_id_arg = String(hits_achieved_keys[key_index]);
+    String current_id_hits_achieved =
+        String::num_int64(hits_achieved[mnchar_id_arg]);
+
+    new_winner_message += "Player " + mnchar_id_arg + " (" +
+                          String(mnchar_id_color_name_dict[mnchar_id_arg]) +
+                          ")" + " scored " + current_id_hits_achieved +
+                          " hits.\n";
+  }
+
+  new_winner_message += "\n";
 
   get_node<Hud>("Hud")->set_winner_text(new_winner_message);
   get_node<Hud>("Hud")->update_between_game_message();
@@ -121,6 +160,9 @@ void Main::_on_hud_process_timer_timeout() {
 }
 
 void Main::_ready() {
+
+  mnchar_id_color_name_dict =
+      get_node<Hud>("Hud")->get_mnchar_id_color_name_dict();
 
   get_node<Timer>("HudProcessTimer")
       ->connect("timeout", Callable(this, "_on_hud_process_timer_timeout"));

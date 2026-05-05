@@ -1759,7 +1759,22 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     This will not only help players link IDs and colors, but also notify them when a particular player has been added to the game.
 
-1. We can also use this ID-color name dictionary to improve our game-winner message. Within main.cpp, go to your `Main::end_game()` function. Replace the following code:
+1. We can also use this ID-color name dictionary to improve our game-winner message. First, though, we'll need to give main.cpp access to it. One option would be to copy and paste its definition into main.h, but this would then double the work needed to maintain it. Instead, simply add the following to the end of the `private` section of your main.h code:
+
+    ```
+    TypedDictionary<String, String> mnchar_id_color_name_dict;
+    ```
+
+Next, open up main.cpp. Add the following to the very start of `Main::_ready()`:
+
+```
+mnchar_id_color_name_dict =
+      get_node<Hud>("Hud")->get_mnchar_id_color_name_dict();
+```
+
+We're simply initializing the Main class's ID-color name dictionary as a copy of the Hud class's. This way, any changes we make to the Hud class's dictionary will automatically get applied within our Main class as well.
+
+Within main.cpp, go to your `Main::end_game()` function. Replace the following code:
 
     ```  String new_winner_message = "The winning player \
     is: " + winning_mnchar_id + "\n\n";
@@ -1771,14 +1786,11 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     String new_winner_message = "The winning player \
     is: " + winning_mnchar_id;
 
-    if (winning_mnchar_id != "Nobody")
-    {
+  if (winning_mnchar_id != "Nobody") {
     new_winner_message +=
-        " (" +
-        String(get_node<Hud>("Hud")
-                   ->get_mnchar_id_color_name_dict()[
-      winning_mnchar_id]) + ")";
-    }
+        " (" + String(mnchar_id_color_name_dict[
+  winning_mnchar_id]) + ")";
+  }
 
     new_winner_message += "\n\n";
     ```
@@ -1790,7 +1802,140 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     ![](/tutorial_screenshots/mnchar_id_color_updates.png)
 
 
+1. So far, the only 'stat' we're sharing with players is who won each game. It would be interesting, however, to keep track of--and display--the number of hits each player scored within each game, along with the overall number of hits and wins across games. Now that we have a decent amount of Hud code in place, this will be relatively easy to implement. First, add the following code to the bottom of the `private` section of main.h:
 
+    ```
+    TypedDictionary<String, int> hits_achieved{};
+
+    TypedDictionary<String, int> overall_hits_achieved{};
+
+    TypedDictionary<String, int> overall_wins{};
+    ```
+
+    These dictionaries will store the three stats mentioned above.
+
+1. Next, open up main.cpp. Directly below `active_players.clear();` within `Main::_on_hud_start_game()`, add:
+
+    ```
+    hits_achieved = TypedDictionary<String, int>{};
+    ```
+
+    This will reset any data present within this dictionary, thus ensuring that only stats for the current game are contained within it.
+
+1. Next, right after `active_mnchars.insert(mnchar_id_arg);` within this same function, add the following code:
+
+    ```
+    hits_achieved[mnchar_id_arg] = 0;
+
+    if (overall_hits_achieved.has(mnchar_id_arg) == false)
+
+    {
+      overall_hits_achieved[mnchar_id_arg] = 0;
+    }
+
+    if (overall_wins.has(mnchar_id_arg) == false) {
+      overall_wins[mnchar_id_arg] = 0;
+    }
+    ```
+
+    This code checks to see whether the ID of the Mnchar that just got added to the game is present within our overall hit and win dictionaries. If it's not, it will get added to both with a starting value of 0.
+
+    (Reference 55)
+
+
+1. Within your `Main::_on_mnchar_mnchar_hit()` function definition in main.cpp, add the following code above `active_mnchars.erase(hit_mnchar_id_arg);`:
+
+    ```
+    int current_hit_value = hits_achieved[firing_mnchar_id_arg];
+    current_hit_value += 1;
+    hits_achieved[firing_mnchar_id_arg] = current_hit_value;
+
+    int current_overall_hit_value = overall_hits_achieved[firing_mnchar_id_arg];
+    current_overall_hit_value += 1;
+    overall_hits_achieved[firing_mnchar_id_arg] = current_overall_hit_value;
+
+    ```
+
+    This code updates both the `hits_achieved` and `overall_hits_achieved` dictionaries to reflect this new hit.
+
+1. Right after `new_winner_message += "\n\n";` within `Main::end_game()` in main.cpp, add the following code:
+
+    ```
+    Array hits_achieved_keys = hits_achieved.keys();
+
+    for (int key_index = 0; key_index < hits_achieved_keys.size(); key_index++)
+
+    {
+        String mnchar_id_arg = String(hits_achieved_keys[key_index]);
+        String current_id_hits_achieved =
+            String::num_int64(hits_achieved[mnchar_id_arg]);
+
+        new_winner_message += "Player " + mnchar_id_arg + " (" +
+                            String(mnchar_id_color_name_dict[mnchar_id_arg]) +
+                            ")" + " scored " + current_id_hits_achieved +
+                            " hits.\n";
+    }
+
+    new_winner_message += "\n";
+    ```
+
+    Here, we're storing an array of all of the keys within `hits_achieved` so that we can more easily loop through this dictionary. For each of these keys, we'll determine how many hits the corresponding player scored, then add these to our new_winner_message. (This method of looping through a TypedDictionary is based on Reference 56.)
+
+1. Compile your code, restart the editor, and launch the game. Once you've hit all other players with a given player, you should be able to see that player's stats within the between-game message screen:
+
+    ![](/tutorial_screenshots/printing_out_hits_dict.png)
+
+    1. You may also want to verify that, if you launch a follow-up game with a new set of players, only those players (and not any who were removed after the first game) show up within these post-game hit stats.
+
+1. While you're within the editor, go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Horizontal Alignment value to Right and its Autowrap value to Word. We'll make use of this new label very soon.
+
+1. Next, within main.cpp's `Main::_on_mnchar_mnchar_hit()` function, add the following code right before `end_game(winning_mnchar)` within the `if (active_mnchars.size() == 1)` condition:
+
+    ```
+    int current_overall_win_value = overall_wins[winning_mnchar];
+    current_overall_win_value += 1;
+    overall_wins[winning_mnchar] = current_overall_win_value;
+    ```
+
+1. The game is now keeping track of our overall win and hit information as well, but players don't have any way of viewing those stats. We can resolve this by adding a new set of code to our Hud class that will let us show this information. First, right after ` ` within the `private` section of main.h, add:
+
+    ```
+    String overall_hits_text{""};
+    String overall_wins_text{""};
+    ```
+
+1. Next, within the `public` section of this file, add the following code directly below ` `:
+
+    ```
+    void set_overall_hits_text(const String overall_hits_arg);
+    void set_overall_wins_text(const String overall_wins_arg);
+    ```
+
+1. Next, add `void update_constant_message();` right below `void update_between_game_message();` within this `private` section.
+
+    The idea here is to store a 'constant' message (i.e. one that appears both within and between games') made up of overall-hit information and overall-win information. This information will be stored within Strings (`overall_hits_text` and `overall_wins_text`) that our `update_constant_message()` function can access.
+
+1. Enter hud.cpp. Right after your `Hud::set_entrants_text()` definition, add the following code:
+
+    ```
+    void Hud::set_overall_hits_text(String overall_hits_arg) {
+    overall_wins_text = overall_hits_arg;
+    }
+
+    void Hud::set_overall_wins_text(String overall_wins_arg) {
+    overall_wins_text = overall_wins_arg;
+    }
+    ```
+
+1. Next, after your `Hud::update_between_game_message()` definition, add:
+
+    ```
+    void Hud::update_constant_message() {
+    String constant_message = overall_hits_text + overall_wins_text;
+    auto constant_label = get_node<Label>("ConstantLabel");
+    constant_label->set_text(constant_message);
+    }
+    ```
 
 
 
@@ -1929,3 +2074,7 @@ Notes:
 * Reference 53: https://docs.godotengine.org/en/stable/classes/class_timer.html
 
 * Reference 54: /godot-cpp/gen/include/godot_cpp/classes/timer.hpp
+
+* Reference 55: /godot-cpp/gen/include/godot_cpp/variant/dictionary.hpp
+
+* Reference 56: https://godotforums.org/d/33822-how-to-loop-a-dictionary-in-godot-c-gdextension/3

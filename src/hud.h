@@ -26,10 +26,10 @@ two seconds.\n\n";
   String instructions_text{""};
   String entrants_text{""};
 
-  Array mnchars_to_include{};
+  String overall_hits_text{""};
+  String overall_wins_text{""};
 
-  // String overall_hits_text{""};
-  // String overall_wins_text{""};
+  Array mnchars_to_include{};
 
   bool can_launch_new_game = true;
 
@@ -49,21 +49,16 @@ public:
 
 
   void set_winner_text(const String winner_arg);
-
   void set_instructions_text(const String instructions_arg);
-
   void set_entrants_text(const String entrants_arg);
 
-  // void set_overall_hits_text(const String overall_hits_arg);
-
-  // void set_overall_wins_text(const String overall_wins_arg);
-
-
-  // void update_within_game_message();
+  void set_overall_hits_text(const String overall_hits_arg);
+  void set_overall_wins_text(const String overall_wins_arg);
 
   void clear_mnchars_to_include();
 
   void update_between_game_message();
+  void update_constant_message();
 
   void set_can_launch_new_game(bool can_launch_new_game_arg);
 

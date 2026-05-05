@@ -30,26 +30,27 @@ void Hud::set_entrants_text(const String entrants_arg) {
   entrants_text = entrants_arg;
 }
 
-// void Hud::set_overall_hits_text(String overall_hits_arg) {
-//   overall_wins_text = overall_hits_arg;
-// }
+void Hud::set_overall_hits_text(String overall_hits_arg) {
+  overall_wins_text = overall_hits_arg;
+}
 
-// void Hud::set_overall_wins_text(String overall_wins_arg) {
-//   overall_wins_text = overall_wins_arg;
-// }
+void Hud::set_overall_wins_text(String overall_wins_arg) {
+  overall_wins_text = overall_wins_arg;
+}
 
 void Hud::update_between_game_message() {
   String between_game_message = winner_text + instructions_text + entrants_text;
-  // UtilityFunctions::print("between_game_message is: ", between_game_message);
   auto between_game_label = get_node<Label>("BetweenGameLabel");
   between_game_label->set_text(between_game_message);
 }
 
-void Hud::clear_mnchars_to_include() { mnchars_to_include.clear(); }
+void Hud::update_constant_message() {
+  String constant_message = overall_hits_text + overall_wins_text;
+  auto constant_label = get_node<Label>("ConstantLabel");
+  constant_label->set_text(constant_message);
+}
 
-// void Hud::update_within_game_message() {
-//   String within_game_message = overall_hits_text + overall_wins_text;
-// }
+void Hud::clear_mnchars_to_include() { mnchars_to_include.clear(); }
 
 void Hud::set_can_launch_new_game(bool can_launch_new_game_arg) {
   can_launch_new_game = can_launch_new_game_arg;
