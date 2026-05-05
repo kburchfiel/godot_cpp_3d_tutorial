@@ -23,7 +23,32 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Create a 'project' folder within this root folder also. Next, open up Godot, which you can download from https://godotengine.org/ if you haven't already. (I'm using Godot 4.6 for this project, but this tutorial should be applicable for newer releases also for a decent while.) Within the loading screen, hit the Create button at the top left. I chose 'Cpp 3D Tutorial' as my project name and the 'project' folder I just created as my path. Once you've filled in these items, hit Create on the bottom right.
 
-    ![](/tutorial_screenshots/new_game_project.png)
+    ![](## Godot CPP 3D Tutorial [Work in progress]
+
+By Ken Burchfiel
+
+Released under the MIT license
+
+This step-by-step guide will demonstrate how to create a 3D multiplayer game in Godot using C++. It is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved, both within your code editor and Godot, to put this kind of game together.
+
+*Note: This resource is being created without the use of generative-AI tools.*
+
+
+## Part 1: Getting started
+
+(Note: Many of these steps will resemble those in the excellent 'Getting started' section of the official GDExtension documentation at https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html . Certain code blocks within this section derive from that document as well.)
+
+1. Create a new folder that will store your Godot project and its corresponding code. I'll call mine `godot_cpp_3d_tutorial`, but the name you choose is of course up to you.
+
+1. First, you'll want to download the latest stable version of godot-cpp from https://github.com/godotengine/godot-cpp . (As of 2026-04-17, a stable version of version 10.x hasn't yet been released, so I went ahead and downloaded the beta version with a commit ID of 4862a9d (https://github.com/godotengine/godot-cpp/tree/4862a9dcf1471c9ea19680b9faadb5b6a9432092 .) Whether you download and unzip or simply clone it, make sure that exists within your project folder within a folder named 'godot-cpp'.
+
+1. Next, open up this godot-cpp folder within your terminal and run `scons platform=linux` (replacing `linux` with your own OS if needed). This will compile all of the source code needed to apply this library. (It will *also* generate additional code files that aren't visible in an uncompiled version of the repository, such as the one on GitHub).
+
+1. Go ahead and create a 'src' folder within your root project folder. This folder will store your source C++ code and its compiled variants.
+
+1. Create a 'project' folder within this root folder also. Next, open up Godot, which you can download from https://godotengine.org/ if you haven't already. (I'm using Godot 4.6 for this project, but this tutorial should be applicable for newer releases also for a decent while.) Within the loading screen, hit the Create button at the top left. I chose 'Cpp 3D Tutorial' as my project name and the 'project' folder I just created as my path. Once you've filled in these items, hit Create on the bottom right.
+
+    ![](tutorial_screenshots/new_game_project.png)
 
 
 1. Close back out of the editor for now. Before we create a scene, we should first create a GDExtension class within C++ that can be used as the basis for that scene. (This is a different approach than what you might be used to with GDScript.)
@@ -142,9 +167,9 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 2: Adding in a class
 
-1. Now that we've gotten those setup tasks out of the way, we can begin programming our own GDExtension classes. Let's start with the Main class, which will govern the game area and some fundamental gameplay logic.
+Now that we've gotten those setup tasks out of the way, we can begin programming our own GDExtension classes. Let's start with the Main class, which will govern the game area and some fundamental gameplay logic.
 
-    Within your src folder, create a new file called 'main.h'. Copy the following code into this file:
+1. Within your src folder, create a new file called 'main.h'. Copy the following code into this file:
 
 
     ```
@@ -223,9 +248,11 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 3: Setting up main.tscn
 
-1. Now that we have a class (albeit a very simple one), we can create a scene based on it. Reopen Godot and open your project. Next, within the 'Create Root Node:' menu, select 'Other Node' and enter 'Main' in the search bar. Hopefully, you will see your newly-created Main node within the list of available nodes:
+Now that we have a class (albeit a very simple one), we can create a scene based on it. 
 
-    ![](/tutorial_screenshots/main_node.png)
+1. Reopen Godot and open your project. Next, within the 'Create Root Node:' menu, select 'Other Node' and enter 'Main' in the search bar. Hopefully, you will see your newly-created Main node within the list of available nodes:
+
+    ![](tutorial_screenshots/main_node.png)
 
     If you *don't* see this node (a situation I've faced quite a few times), this likely means that you forgot one of the earlier steps (such as adding references to this node to your register_types.cpp file). 
 
@@ -234,7 +261,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. A gameplay window with a gray box will open. Nothing will appear inside it, which is to be expected. However, you *should* see `Main::_ready() just got called.` appear within your Output tab in the lower half of the main editor window:
 
-    ![](/tutorial_screenshots/main_ready.png)
+    ![](tutorial_screenshots/main_ready.png)
 
 1. While we're inside the editor, let's go ahead and create a game area. (Many of the following steps were based on the 'Setting up the game area' section of the Your First 3D Game Tutorial (Reference 3).) Right click on Main and select Add Child Node, then search for (and select) StaticBody3D. Rename it Ground within your scene tree on the left side of the editor. Next, add a CollisionShape3D and a MeshInstance3D as children of Ground.
 
@@ -248,7 +275,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     Here's what the Ground should look like at this point:
 
-    ![](/tutorial_screenshots/ground.png)
+    ![](tutorial_screenshots/ground.png)
 
 1. Before we can get to the 'action' part of this scene, we'll need lights and a camera. Add a DirectionalLight3D as a child of Main, then set its y transform to 20.0. (The x and z transforms can stay at 0.0.) Change its x rotation to -90, or whatever allows the light to point directly down at the ground. (You'll know it's working when you see the ground brighten up.) Check the Shadow box within the Light3D section of the Inspector as well.
 
@@ -256,14 +283,14 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Try running the scene again. You should now see your game area within the window that appears:
 
-    ![](/tutorial_screenshots/game_area.png)
+    ![](tutorial_screenshots/game_area.png)
 
 
 1. Now that we have a game scene in place, this will be a good time to begin work on our Mnchar (main character) class. There's plenty more C++ code that will get added to main.cpp and main.h, but those additions will be easier to implement and debug once we have actual characters and projectiles to manage.
 
 ## Part 4: Laying the foundations for our Mnchar class
 
-1. Our Mnchar class, which players will be able to control via game controllers, will fire projectiles and (potentially) get hit by other projectiles. We'll eventually configure our game such that anywhere from 2-8 Mnchars can get added to the game scene at the start of each game; however, that configuration will involve a Hud class that we won't be setting up for a little while.
+Our Mnchar class, which players will be able to control via game controllers, will fire projectiles and (potentially) get hit by other projectiles. We'll eventually configure our game such that anywhere from 2-8 Mnchars can get added to the game scene at the start of each game; however, that configuration will involve a Hud class that we won't be setting up for a little while.
 
 1. To begin the setup process, create both a 'mnchar.h' and a 'mnchar.cpp' file within your src folder. Enter the following code into mnchar.h:
 
@@ -372,7 +399,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     You *should* see the custom Movement Speed property that we configured near the top of the Inspector menu, along with our default value (14). Changing this value in the editor will also change the Mnchar's behavior within our game.
 
-    ![](/tutorial_screenshots/early_mnchar_scene.png)
+    ![](tutorial_screenshots/early_mnchar_scene.png)
 
     (I have found, however, that this property will sometimes disappear from the editor after compiling my code. This might be caused by an issue with my current setup, but it might also be a glitch within the editor itself. Closing, then relaunching the editor always seems to resolve this issue, thankfully.)
 
@@ -396,7 +423,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     (You're welcome to use a key other than J, such as Left Arrow, if you'd like. The use of 'J' will make more sense in the context of all the keys we'll be adding in.)
 
-    ![](/tutorial_screenshots/first_input_map_entry.png)
+    ![](tutorial_screenshots/first_input_map_entry.png)
 
 1. Perform the same steps for the following action names and keys:
 
@@ -410,7 +437,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Once you've finished this process, your input map should look like the following:
 
-    ![](/tutorial_screenshots/player_0_keyboard_input_map.png)
+    ![](tutorial_screenshots/player_0_keyboard_input_map.png)
 
     By the way, the reason for adding '_0' to the end of these actions is to allow different sets of controls to be distinguished for different players later on.
 
@@ -418,9 +445,9 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 6: Adding a Mnchar to the game area
 
-1. We're almost ready to add in code that will let us move our Mnchar around the game area. First, though, we need to *add* the Mnchar to the game area.
+We're almost ready to add in code that will let us move our Mnchar around the game area. First, though, we need to *add* the Mnchar to the game area.
 
-1. One option would be to instantiate a Mnchar as a child scene of main.tscn (Reference 4). However, since we're creating a multiplayer game whose player count might change from round to round, it will be more ideal to add Mnchars to this scene via code. (That way, a specific number of Mnchars can be placed within the game area depending on how many players choose to enter a given game.) The following steps will allow us to add a Mnchar to the scene using C++.
+One option would be to instantiate a Mnchar as a child scene of main.tscn (Reference 4). However, since we're creating a multiplayer game whose player count might change from round to round, it will be more ideal to add Mnchars to this scene via code. (That way, a specific number of Mnchars can be placed within the game area depending on how many players choose to enter a given game.) The following steps will allow us to add a Mnchar to the scene using C++.
 
 1. Within main.h, add the following code right above `protected:`
 
@@ -490,7 +517,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Note: When I was putting this code together, I initially forgot to define `get_mnchar_scene()` and `set_mnchar_scene()` within main.cpp. Although my code compiled successfully, these omissions caused Godot to fail to locate both my Main and Mnchar classes within the editor:
 
-    ![](/tutorial_screenshots/red_xs_due_to_missing_functions.png)
+    ![](tutorial_screenshots/red_xs_due_to_missing_functions.png)
 
     (I knew this was the cause because I've made similar mistakes more often than I'd like to admit!)
 
@@ -498,13 +525,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     I actually managed to make a similar mistake later on for `get_rotation_speed()` and `set_rotation_speed()`. Error messages within the console helped me figure out the issue. (Note the `get_rotation_speed` reference within the third-to-last error.)
 
-    ![](/tutorial_screenshots/scary_but_helpful_error_messages.png)
+    ![](tutorial_screenshots/scary_but_helpful_error_messages.png)
 
 1. Go ahead and compile your code, then relaunch the editor. After you open main.tscn and click on the Main node within your scene tree, you should now see a new Packed Scene entry right below Main in the inspector. Click the 'empty' text; select 'Load'; and then choose your mnchar.tscn scene. 
 
 1. When you try playing your project, you should now see a little gray box (your Mnchar) in the middle of your game area:
 
-    ![](/tutorial_screenshots/mnchar_added_via_code.png)
+    ![](tutorial_screenshots/mnchar_added_via_code.png)
 
 
 1. You'll notice, though, that the main character is partially sunk in the ground. We could fix this by changing its transform within Mnchar.tscn; however, because we'll need to be able to move Mnchars around later on when setting up multiplayer games, we may as well add some initial movement code now.
@@ -544,23 +571,23 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Compile your code, then rerun your main scene. You should now see the full Mnchar closer to the bottom left of the window:
 
-    ![](/tutorial_screenshots/repositioned_mnchar.png)
+    ![](tutorial_screenshots/repositioned_mnchar.png)
 
 ## Part 7: Moving the Mnchar
 
-1. Because we're creating a multiplayer game, we'll want to set up our movement code in a way that allows each player to move his or her own Mnchar (and no one else's). The approach we'll take for this task will be as follows:
+Because we're creating a multiplayer game, we'll want to set up our movement code in a way that allows each player to move his or her own Mnchar (and no one else's). The approach we'll take for this task will be as follows:
 
-    1. We'll first create a new String variable (`mnchar_id`) that will store a unique ID for each Mnchar. (These IDs will range from "0" to "7" in order to support up to eight different players.) This variable will also be useful for setting character-specific locations, rotations, and colors.
-    
-    1. We'll also add each of these same IDs to the end of all action names within one particular group of movement commands that we'll create. Thus, one group's action names will end in "0", others will end in "1", and so forth. (This is why we added "_0" to our first set of movement names.) We'll also specify that each set of commands will only work for one particular device. (The device IDs recognized by Godot range from 0 through 7, thus matching our own list of possible IDs.)
+* We'll first create a new String variable (`mnchar_id`) that will store a unique ID for each Mnchar. (These IDs will range from "0" to "7" in order to support up to eight different players.) This variable will also be useful for setting character-specific locations, rotations, and colors.
 
-    1. In our movement code, we'll check for movements that match the given Mnchar's ID. For instance, here's what our left/right movement code will look like:
+* We'll also add each of these same IDs to the end of all action names within one particular group of movement commands that we'll create. Thus, one group's action names will end in "0", others will end in "1", and so forth. (This is why we added "_0" to our first set of movement names.) We'll also specify that each set of commands will only work for one particular device. (The device IDs recognized by Godot range from 0 through 7, thus matching our own list of possible IDs.)
 
-        ```
-        x_direction = input->get_axis("move_left_"+mnchar_id, 
-        "move_right_"+mnchar_id);
-        ```
-    1. In summary, by having Mnchar IDs match movement-name suffixes, and by having all movements for a particular suffix match only one particular device, we can create a functioning multiplayer control setup without too much extra work. (This approach was based on references 11 through 15.) 
+* In our movement code, we'll check for movements that match the given Mnchar's ID. For instance, here's what our left/right movement code will look like:
+
+    ```
+    x_direction = input->get_axis("move_left_"+mnchar_id, 
+    "move_right_"+mnchar_id);
+    ```
+* In summary, by having Mnchar IDs match movement-name suffixes, and by having all movements for a particular suffix match only one particular device, we can create a functioning multiplayer control setup without too much extra work. (This approach was based on references 11 through 15.) 
 
 1. The first step here will be to add a `mnchar_id` value to our Mnchar class. Under `double movement_speed = 14;` within the `private` section of Mnchar.h, add:
 
@@ -723,7 +750,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 8: Creating a projectile
 
-1. It's neat to move our Mnchar around with code, but the game won't be too much fun without anything for it to fire (or be hit by). Therefore, let's go ahead and add a Projectile class to our game. This class will have many similarities to the Mnchar class (on which its code will be based). 
+It's neat to move our Mnchar around with code, but the game won't be too much fun without anything for it to fire (or be hit by). Therefore, let's go ahead and add a Projectile class to our game. This class will have many similarities to the Mnchar class (on which its code will be based). 
 
 1. Within your src/ folder, create two new files, 'projectile.h' and 'projectile.cpp'. Add the following text to projectile.h:
 
@@ -853,11 +880,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Finally, add a CollisionShape3D as a child of Projectile; assign it a BoxShape3D; and set this shape's x, y, and z values to 0.25, 0.25, and 1, respectively. (Again, refer to the 'Adding a Mnchar to the game area' section if needed.)
 
-![](/tutorial_screenshots/projectile_scene.png)
+![](tutorial_screenshots/projectile_scene.png)
 
 ## Part 10: Allowing Mnchars to fire projectiles
 
-1. Next, we'll need to add code for firing projectiles to our Mnchar class. First, within mnchar.h, add the following two lines to the end of your list of `#include` statements:
+Next, we'll need to add code for firing projectiles to our Mnchar class. 
+
+1. Within mnchar.h, add the following two lines to the end of your list of `#include` statements:
 
     ```
     #include <godot_cpp/classes/packed_scene.hpp>
@@ -938,17 +967,17 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Launch your game. Confirm that pressing space bar causes a projectile to fire in front of the player's turret. Also confirm that this remains the case regardless of which direction the player is facing, and that the projectile's velocity isn't affected in any way by the player's actions following the fire command. (It took quite a bit of debugging on my part when I was initially coding this section to get things working. I hope that you won't need to do the same, but don't get too frustrated if things don't work right away.)
 
-![](/tutorial_screenshots/firing_projectiles.png)
+![](tutorial_screenshots/firing_projectiles.png)
 
 ## Part 11: Adding a second Mnchar to the scene
 
-1. Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. 
+Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. 
 
-    Since having two identical Mnchars within a scene can get confusing, this will also be a good time to create code that assigns different colors to different players. And in order to assign those colors, we may as well set up a typed dictionary that will store colors for all the players who will might eventually join our game. 
-    
-    Finally, since we're adding a typed dictionary for player colors, we may as well add ones for starting locations and rotation values as well, as these will also play an important role in initializing new Mnchars.
-    
-    (This is a bit like If You Give a Mouse a Cookie, but in game-development form! It's funny quickly one programming task can lead to five others.)
+Since having two identical Mnchars within a scene can get confusing, this will also be a good time to create code that assigns different colors to different players. And in order to assign those colors, we may as well set up a typed dictionary that will store colors for all the players who will might eventually join our game. 
+
+Finally, since we're adding a typed dictionary for player colors, we may as well add ones for starting locations and rotation values as well, as these will also play an important role in initializing new Mnchars.
+
+(This is a bit like If You Give a Mouse a Cookie, but in game-development form! It's funny quickly one programming task can lead to five others.)
 
 1. With that rambling introduction out of the way, let's go ahead and create typed dictionaries that will store colors, rotation values, and starting locations for all of our players. Within main.h, add `#include <godot_cpp/variant/typed_dictionary.hpp>` to the bottom of your list of `#include statements`. Next, enter the following code right below `Ref<PackedScene> mnchar_scene` within the `private` section:
 
@@ -1079,7 +1108,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     When adding in each of these actions, make sure to specify Device 1 (not 'All devices') as the input device. Otherwise, these actions will also affect the movement of Mnchar 0.
 
-    ![](/tutorial_screenshots/adding_player_1_controls.png)
+    ![](tutorial_screenshots/adding_player_1_controls.png)
 
     You can also peform similar steps for your existing actions that end in '_0'. Just make sure to select Device 0 for those rather than Device 1.
 
@@ -1087,7 +1116,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     Once you've made these changes, the lower section of your input map should look like the following:
 
-    ![](/tutorial_screenshots/player_1_inputs.png)
+    ![](tutorial_screenshots/player_1_inputs.png)
 
     If you don't have a controller, or simply don't want to go through the trouble of adding in these commands, you can *also* go to this repository's project.godot file (https://github.com/kburchfiel/godot_cpp_3d_tutorial/blob/main/project/project.godot); copy all of the text between the `[input]` entry and the [`physics`] entry; and then paste it into your own project's project.godot file. (This file should be available at /project/project.godot.)
 
@@ -1095,13 +1124,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Launch your main scene. You should see the following:
 
-    ![](/tutorial_screenshots/two_green_players.png)
+    ![](tutorial_screenshots/two_green_players.png)
 
     Two players are now present within the game area, as expected. But why are they both green? Was there an issue with our color dictionary? After quite a bit of debugging, I eventually found the solution in a post by Tobias Wink (Reference 40). The problem is that, currently, our Mnchar's material is shared across both of our Mnchar instances; as a result, changing the color of the second Mnchar will also change the first Mnchar's color.
 
     To resolve this, double-click on your mnchar.tscn scene; click on the 'Body' MeshInstance3D; click the white cube within the Mesh section of the Inspector (not the game) to open the Edit window; open up the Resource section near the bottom; and check the 'Local to Scene' box. Next, click the white sphere within the Material section of the editor; scroll down to and open its own Resource section; and check *that* 'Local to Scene' box as well. After saving your scene and relaunching your game, you should now see one blue cube and one green cube within the game area:
 
-    ![](/tutorial_screenshots/blue_and_green_mnchars.png)
+    ![](tutorial_screenshots/blue_and_green_mnchars.png)
 
 1. As the blue Mnchar, try firing some projectiles towards the green Mnchar by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) You should see the projectiles stop in place when they reach the green Mnchar, though if enough of them get fired, it might shift it around a bit. We'll now change this behavior so that a Mnchar who gets hit by a projectile gets removed from the game scene.
 
@@ -1160,7 +1189,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
     If all goes well, you should then see a little green icon appear below the `body_entered` signal in the Signals tab--along with the txt `.. :: _on_projectile_detector_body_entered()`. (The `..` signifies that you've conneced this signal to its parent, e.g. Mnchar.)
 
-    ![](/tutorial_screenshots/body_entered_signal.png)
+    ![](tutorial_screenshots/body_entered_signal.png)
 
 1. Relaunch your game and try firing a projectile at the green Mnchar. Once the projectile hits the Mnchar, it should now disappear.
 
@@ -1183,7 +1212,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 13: Ending the game
 
-1. We're very close to having a working prototype of our game--one in which two players can attempt to hit one another with projectiles. Unless both players hit each other at the same time, we should be able to figure out who won (e.g. by seeing which player is left standing). However, it will be ideal to have the game determine this as well.
+We're very close to having a working prototype of our game--one in which two players can attempt to hit one another with projectiles. Unless both players hit each other at the same time, we should be able to figure out who won (e.g. by seeing which player is left standing). However, it will be ideal to have the game determine this as well.
 
 1. Within main.h, add the following code right below your `mnchar_id_color_dict` initialization:   
 
@@ -1284,13 +1313,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Compile your code, restart your editor, and try hitting the blue Mnchar with a projectile. Once you succeed, the console should inform you that "The player with the ID of 0 won the game."
 
-    ![](/tutorial_screenshots/winning_player_in_console.png)
+    ![](tutorial_screenshots/winning_player_in_console.png)
 
 1. When a game ends, we'll want to remove the final active player (e.g. the winner) from the scene. Otherwise, that player will still be active when we begin a new game--which would be an interesting mechanic for sure, but not one we'll want for this tutorial.
 
     To prepare to remove all players, select your Mnchar within mnchar.tscn's scene tree, then go over to the Groups tab (to the right of the Inspector and Signals tabs). Click the '+' to the left of the text bar to open up a Create New Group dialog. Name your group 'mnchars' and hit 'OK.'
 
-    ![](/tutorial_screenshots/mnchar_scene_group.png)
+    ![](tutorial_screenshots/mnchar_scene_group.png)
 
 1. We'll make use of this new scene group within a new `end_game()` function. Within main.h's `public` section, add `void end_game(String winning_mnchar_id);` right after your `void _on_mnchar_mnchar_hit()` function declaration. In addition, add `#include <godot_cpp/classes/scene_tree.hpp>` to the bottom to that file's list of `#include` statements.
 
@@ -1331,25 +1360,25 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 ## Part 14: Adding a heads-up display (HUD) class
 
-1. Congratulations! You now have a working 3D multiplayer game in C++. After launching the game, you and a friend or family member can try hitting each other's Mnchar with a projectile; once one of you succeeds, the console will announce a winner, and the game will end. You can then restart the scene to play again.
+Congratulations! You now have a working 3D multiplayer game in C++. After launching the game, you and a friend or family member can try hitting each other's Mnchar with a projectile; once one of you succeeds, the console will announce a winner, and the game will end. You can then restart the scene to play again.
 
-    However, there are plenty of ways that we can improve on this setup:
-    
-    1. Since the debug console won't always be available, some in-game text should let you know who won.
-    1. It would be ideal to be able to launch a new game without restarting the scene.
-    1. Before we launch a new game, we should allow new players to join and previous players to opt out. 
-    1. The game could show statistics on how many hits each player achieved within the previous game--and the overall number of hits and wins each player has earned since the session began. There should also be a way to reset these overall stats.
-    1. Players should be able to exit out of a game in progress while also preventing this canceled game from affecting their overall stats.
+However, there are plenty of ways that we can improve on this setup:
 
-    To implement these enhancements, we'll create a new Hud class that can display in-game text *and*, via its `_process` function, handle new-game-setup tasks. Here's a simplified overview of how this class will interact with Main:
+* Since the debug console won't always be available, some in-game text should let you know who won.
+* It would be ideal to be able to launch a new game without restarting the scene.
+* Before we launch a new game, we should allow new players to join and previous players to opt out. 
+* The game could show statistics on how many hits each player achieved within the previous game--and the overall number of hits and wins each player has earned since the session began. There should also be a way to reset these overall stats.
+* Players should be able to exit out of a game in progress while also preventing this canceled game from affecting their overall stats.
 
-    1. When `Main::_end_game()` is called, a label within Hud will announce the winner. Next, Hud's `_process()` function will launch, thus allowing new players to enter the game.
+To implement these enhancements, we'll create a new Hud class that can display in-game text *and*, via its `_process` function, handle new-game-setup tasks. Here's a simplified overview of how this class will interact with Main:
 
-    1. Hud will store, and display, information about which players have chosen to enter the next game. (It will gather this information by checking for player inputs within `_process()`.)
+* When `Main::_end_game()` is called, a label within Hud will announce the winner. Next, Hud's `_process()` function will launch, thus allowing new players to enter the game.
 
-    1. Once a player holds down both the `fire` and `reset` buttons, Hud() will emit a signal, along with information about the players who want to join, that Main will use to (1) call a new game-start function and (2) pause Hud's `_process()` function.    
+* Hud will store, and display, information about which players have chosen to enter the next game. (It will gather this information by checking for player inputs within `_process()`.)
 
-1. To begin setting up the Hud class, create two new files--'hud.h' and 'hud.cpp'--within your src/ folder. (Since Hud is the final class we'll add during our tutorial, these will be our final two source files.)
+* Once a player holds down both the `fire` and `reset` buttons, Hud() will emit a signal, along with information about the players who want to join, that Main will use to (1) call a new game-start function and (2) pause Hud's `_process()` function.    
+
+* To begin setting up the Hud class, create two new files--'hud.h' and 'hud.cpp'--within your src/ folder. (Since Hud is the final class we'll add during our tutorial, these will be our final two source files.)
 
 1. Within hud.h, add the following code:
 
@@ -1521,7 +1550,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Compile your game, restart your editor, and launch your main scene. The BetweenGameLabel should now display the `between_game_message` you just configured in the top right.
 
-    ![](/tutorial_screenshots/new_game_message.png)
+    ![](tutorial_screenshots/new_game_message.png)
 
 1. These instructions aren't correct yet, since we haven't added the corresponding code that will make them valid. Let's work on adding that code now. First, within hud.h, add `#include <godot_cpp/classes/input.hpp>` to the bottom of your list of `#include` statements. Next, fill in your `Hud::_process()` function within hud.cpp with the following code:
 
@@ -1626,11 +1655,11 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Compile your code, restart your editor, and launch your game. Press keys 1-7 on your keyboard, along with the space bar, to add all 8 Mnchars to your game; next, press Space Bar and R at the same time to launch it. You should now see the following:
 
-    ![](/tutorial_screenshots/launching_8_player_game.png)
+    ![](tutorial_screenshots/launching_8_player_game.png)
 
 ## Part 16: Handling end-of-game tasks
 
-1. We can now launch our game with an arbitrary number of players. However, we now need to allow players to return to the game-setup menu once a game is complete.
+We can now launch our game with an arbitrary number of players. However, we also need to allow players to return to the game-setup menu once a game is complete.
 
 1. First, within hud.h, add `void clear_mnchars_to_include();` right before `void _process()` within this script's `public` section. Next, right before `void Hud::_prcocess()` within hud.cpp, define this new function as follows:
 
@@ -1710,13 +1739,13 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Compile your code, restart the editor, and launch your game. Try adding some players to the game, then clear all but one player out in order to end it. Once the game ends, you should see the a message about the winning player (but no other text). *Then*, after 2 seconds, you should see the game's instructions and regain the ability to add players.
 
-    ![](/tutorial_screenshots/updated_between_game_text.png)
+    ![](tutorial_screenshots/updated_between_game_text.png)
 
     We're not far from finishing the game at this point! However, we still need to add a few more UI elements, including running overall stats totals--and allow players to reset both those stats totals and active games.
 
 ## Part 17: Further expanding our UI
 
-1. Right now, we're referring to players using integers. However, these numbers won't make much sense to players on their own. Therefore, we'll add in a dictionary that allows players' colors to be displayed together with their IDs.
+Right now, we're referring to players using integers. However, these numbers won't make much sense to players on their own. Therefore, we'll add in a dictionary that allows players' colors to be displayed together with their IDs.
 
 1. First, at the end of your `private` section within hud.h, add the following code:
 
@@ -1765,18 +1794,19 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
     TypedDictionary<String, String> mnchar_id_color_name_dict;
     ```
 
-Next, open up main.cpp. Add the following to the very start of `Main::_ready()`:
+1. Next, open up main.cpp. Add the following to the very start of `Main::_ready()`:
 
-```
-mnchar_id_color_name_dict =
-      get_node<Hud>("Hud")->get_mnchar_id_color_name_dict();
-```
+    ```
+    mnchar_id_color_name_dict =
+        get_node<Hud>("Hud")->get_mnchar_id_color_name_dict();
+    ```
 
-We're simply initializing the Main class's ID-color name dictionary as a copy of the Hud class's. This way, any changes we make to the Hud class's dictionary will automatically get applied within our Main class as well.
+    We're simply initializing the Main class's ID-color name dictionary as a copy of the Hud class's. This way, any changes we make to the Hud class's dictionary will automatically get applied within our Main class as well.
 
-Within main.cpp, go to your `Main::end_game()` function. Replace the following code:
+1. Within main.cpp, go to your `Main::end_game()` function. Replace the following code:
 
-    ```  String new_winner_message = "The winning player \
+    ```  
+    String new_winner_message = "The winning player \
     is: " + winning_mnchar_id + "\n\n";
     ```
 
@@ -1786,11 +1816,11 @@ Within main.cpp, go to your `Main::end_game()` function. Replace the following c
     String new_winner_message = "The winning player \
     is: " + winning_mnchar_id;
 
-  if (winning_mnchar_id != "Nobody") {
-    new_winner_message +=
-        " (" + String(mnchar_id_color_name_dict[
-  winning_mnchar_id]) + ")";
-  }
+    if (winning_mnchar_id != "Nobody") {
+        new_winner_message +=
+            " (" + String(mnchar_id_color_name_dict[
+    winning_mnchar_id]) + ")";
+    }
 
     new_winner_message += "\n\n";
     ```
@@ -1799,7 +1829,7 @@ Within main.cpp, go to your `Main::end_game()` function. Replace the following c
 
 1. Compile your code, restart the Godot editor, and launch the game. You should now be able to see a list of entrants within the text that appears prior to the start of a new game. (This list will also get updated automatically whenever a new player gets added. In addition, the colors corresponding to these entrants' IDs, along with the winner's ID, will now be present within the between-game display.)
 
-    ![](/tutorial_screenshots/mnchar_id_color_updates.png)
+    ![](tutorial_screenshots/mnchar_id_color_updates.png)
 
 
 1. So far, the only 'stat' we're sharing with players is who won each game. It would be interesting, however, to keep track of--and display--the number of hits each player scored within each game, along with the overall number of hits and wins across games. Now that we have a decent amount of Hud code in place, this will be relatively easy to implement. First, add the following code to the bottom of the `private` section of main.h:
@@ -1883,11 +1913,21 @@ Within main.cpp, go to your `Main::end_game()` function. Replace the following c
 
 1. Compile your code, restart the editor, and launch the game. Once you've hit all other players with a given player, you should be able to see that player's stats within the between-game message screen:
 
-    ![](/tutorial_screenshots/printing_out_hits_dict.png)
+    ![](tutorial_screenshots/printing_out_hits_dict.png)
 
     1. You may also want to verify that, if you launch a follow-up game with a new set of players, only those players (and not any who were removed after the first game) show up within these post-game hit stats.
 
-1. While you're within the editor, go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Horizontal Alignment value to Right and its Autowrap value to Word. We'll make use of this new label very soon.
+1. While you're within the editor, Go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Autowrap value to Word. We'll make use of this new label very soon.
+
+1. This label will get displayed on the right side of the screen so as not to overlap with the between-game message. However, before we can set its specific location, we should first expand the game window to full-HD dimensions. Go to Project --> Project Settings, then select the 'Display' section within the menu on the left. Change the Viewport Width and Viewport Height options within the Window menu to 1920 and 1080, respectively. 
+
+    (You're welcome to choose smaller dimensions in order to allow your game to display on smaller monitors; you'll just then need to modify certain label settings specified in this tutorial in order to make them compatible with these custom dimensions.)
+
+1. Next, within the Layout section of the ConstantLabel's Inspector window, set the Size's x value to 250.0 pixels and the Position's x value to 1650.0 pixels. (1920 - 250 - 20 (the same buffer we're using for our BetweenGameLabel) equals 1650.) 
+
+1. Now that we have a larger game window, we should also increase our font sizes accordingly. Within the Theme Overrides section of the ConstantLabel inspector, click on Font Sizes, then set the Font Size value to 20 pixels. 
+
+1. Increase the Font Size of the BetweenGameLabel to 20 pixels as well using the method described above. In addition, within the Transform section of the BetweenGameLabel's Inspector view, change the window's size to 600 pixels. (This will provide enough room for all between-game text to get displayed, even when 8 players are active.)
 
 1. Next, within main.cpp's `Main::_on_mnchar_mnchar_hit()` function, add the following code right before `end_game(winning_mnchar)` within the `if (active_mnchars.size() == 1)` condition:
 
@@ -1919,7 +1959,7 @@ Within main.cpp, go to your `Main::end_game()` function. Replace the following c
 
     ```
     void Hud::set_overall_hits_text(String overall_hits_arg) {
-    overall_wins_text = overall_hits_arg;
+    overall_hits_text = overall_hits_arg;
     }
 
     void Hud::set_overall_wins_text(String overall_wins_arg) {
@@ -1937,13 +1977,94 @@ Within main.cpp, go to your `Main::end_game()` function. Replace the following c
     }
     ```
 
+1. Because determining what text to place within the overall-hits and overall-wins Strings will be somewhat involved, we'll create separate functions within main.cpp for this process. Add the following code to the end of `main.h`'s `public` section:
 
+    ```
+    void generate_overall_hits_text();
+
+    void generate_overall_wins_text()
+    ```
+
+1. Next, at the end of main.cpp, add the following definitions for these new functions:
+
+    ```
+    void Main::generate_overall_hits_text() {
+    String overall_hits_text = "Overall hits:\n";
+
+    Array overall_hits_achieved_keys = overall_hits_achieved.keys();
+
+    for (int key_index = 0; key_index < overall_hits_achieved_keys.size();
+        key_index++) {
+        overall_hits_text +=
+            "Player " + String(overall_hits_achieved_keys[key_index]) + " (" +
+            String(mnchar_id_color_name_dict[String(
+                overall_hits_achieved_keys[key_index])]) +
+            "): " +
+            String::num_int64(
+                overall_hits_achieved[overall_hits_achieved_keys[key_index]]) +
+            "\n";
+    }
+
+    get_node<Hud>("Hud")->set_overall_hits_text(overall_hits_text);
+    get_node<Hud>("Hud")->update_constant_message();
+    }
+
+    void Main::generate_overall_wins_text() {
+    Array overall_wins_keys = overall_wins.keys();
+
+    String overall_wins_text = "\nOverall wins:\n";
+
+    for (int key_index = 0; key_index < overall_wins_keys.size(); key_index++)
+
+    {
+        overall_wins_text +=
+            "Player " + String(overall_wins_keys[key_index]) + " (" +
+            String(mnchar_id_color_name_dict[String(
+                overall_wins_keys[key_index])]) +
+            "): " + String::num_int64(overall_wins[overall_wins_keys[key_index]]) +
+            "\n";
+    }
+
+    get_node<Hud>("Hud")->set_overall_wins_text(overall_wins_text);
+    get_node<Hud>("Hud")->update_constant_message();
+    }
+
+    ```
+
+    These functions iterate through the overall_hits_achieved and overall_wins dictionaries to determine the number of hits and wins, respectively, achieved by each player during all games played thus far. They then update Hud's `overall_hits_text` and `overall_wins_text` values with this data, then call `update_constant_message()` to add these stats to the game window.
+
+    (We could also have had these new functions *return* their text values, then call `set_overall_hits_text()`, `set_overall_wins_text()`, and `update_constant_message()` separately.)
+
+1. The final step is to add in calls to these two new functions where needed. First, after `active_mnchars.erase(hit_mnchar_id_arg);` within `Main::_on_mnchar_mnchar_hit()`, add `generate_overall_hits_text();`. Next, right *before* `end_game(winning_mnchar);` within this same function, add `generate_overall_wins_text();`.
+
+1. Finally, at the very end of `Main::_on_hud_start_game`, add:
+
+    ```
+    generate_overall_hits_text();
+    generate_overall_wins_text();
+    ```
+
+    This code will cause `update_constant_message()` to get called two times in quick succession. If we had excluded that function from `generate_overall_hits_text()` and `generate_overall_wins_text()`, we could then just call it once here. However, the current approach, while not the most efficient possible, shoudn't be too much of a computational burden.
+
+1. Compile your code, restart the Godot editor, and launch your game. Try adding 8 players to the game, then hit seven of them with one of your players. Next, within the ensuing between-game menu, try adding another set of 8 players to the game. Your Hud text should appear as follows:
+
+    ![](tutorial_screenshots/constant_and_between_game_text.png)
+
+    Although a larger font size would have been useful, the 20-pixel size we chose allows all of this text to fit within the screen, *and* prevents the constant text from overlapping with the game area, which would be a major distraction for players.
+
+## Part 18: Adding in reset options
+
+In certain cases (and not just because they lost!), players may wish to exit out of an active game. For example, it's currently possible to add just one player to a game; this would result in a 'softlock' (https://en.wiktionary.org/wiki/softlock), as there's no way to exit out of this round without shutting down the game. 
+
+In addition, players might want to reset the hit and win stats on occasion. (For instance, players might want to do one or more practice rounds, then reset the statistics so that such rounds don't count towards their overall score.) 
+
+This part of the tutorial will add both of these features to the game using the Reset button that we've already added to our input map.
 
 # Here with editing:
 
-1. Display stats at the close of a game within the winner message--and also store/display overall stats. (This will involve adding hits, overall hits, and overall wins dictionaries to your Main class--and maybe your Mnchar class too?)
+ Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.) This will involve creating a few additional dictionaries.
 
-1. Create ## Part 18: Allowing players to reset the game (and overall stats). Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.) This will involve creating a few additional dictionaries.
+1. Create Part 19: Final enhancements. (1) add boundaries to the game area so players can't fall off (make sure to update your layer/mask settings accordingly), *and* (2) update projectile colors to match those of their firing Mnchar.
 
 
 ## Future editing notes
@@ -2077,4 +2198,4 @@ Notes:
 
 * Reference 55: /godot-cpp/gen/include/godot_cpp/variant/dictionary.hpp
 
-* Reference 56: https://godotforums.org/d/33822-how-to-loop-a-dictionary-in-godot-c-gdextension/3
+* Reference 56: https://godotforums.org/d/33822-how-to-loop-a-dictionary-in-godot-c-gdextension/3tutorial_screenshots/new_game_project.png)

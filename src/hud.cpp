@@ -31,7 +31,7 @@ void Hud::set_entrants_text(const String entrants_arg) {
 }
 
 void Hud::set_overall_hits_text(String overall_hits_arg) {
-  overall_wins_text = overall_hits_arg;
+  overall_hits_text = overall_hits_arg;
 }
 
 void Hud::set_overall_wins_text(String overall_wins_arg) {
@@ -45,6 +45,8 @@ void Hud::update_between_game_message() {
 }
 
 void Hud::update_constant_message() {
+  UtilityFunctions::print("Overall hits text:", overall_hits_text);
+  UtilityFunctions::print("Overall wins text:", overall_wins_text);
   String constant_message = overall_hits_text + overall_wins_text;
   auto constant_label = get_node<Label>("ConstantLabel");
   constant_label->set_text(constant_message);

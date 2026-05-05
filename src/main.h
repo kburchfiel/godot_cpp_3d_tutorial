@@ -67,4 +67,9 @@ public:
 void _on_hud_process_timer_timeout();
 
   void _ready();
+
+void generate_overall_hits_text();
+
+void generate_overall_wins_text();
+
 };

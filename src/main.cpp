@@ -47,8 +47,12 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
 
   active_mnchars.erase(hit_mnchar_id_arg);
 
+  generate_overall_hits_text();
+
   UtilityFunctions::print("Current size of active_mnchars: ",
                           active_mnchars.size());
+
+
 
   if (active_mnchars.size() == 1) {
     String winning_mnchar = *active_mnchars.begin();
@@ -57,6 +61,7 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
     current_overall_win_value += 1;
     overall_wins[winning_mnchar] = current_overall_win_value;
 
+    generate_overall_wins_text();
     end_game(winning_mnchar);
   }
 
@@ -111,6 +116,10 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
        ++active_mnchars_iterator) {
     UtilityFunctions::print(*active_mnchars_iterator);
   }
+
+  generate_overall_hits_text();
+  generate_overall_wins_text();
+
 }
 
 void Main::end_game(String winning_mnchar_id) {
@@ -121,8 +130,7 @@ is: " + winning_mnchar_id;
 
   if (winning_mnchar_id != "Nobody") {
     new_winner_message +=
-        " (" + String(mnchar_id_color_name_dict[
-  winning_mnchar_id]) + ")";
+        " (" + String(mnchar_id_color_name_dict[winning_mnchar_id]) + ")";
   }
 
   new_winner_message += "\n\n";
@@ -176,4 +184,45 @@ void Main::_ready() {
       get_node<Hud>("Hud")->get_instructions());
 
   get_node<Hud>("Hud")->update_between_game_message();
+}
+
+void Main::generate_overall_hits_text() {
+  String overall_hits_text = "Overall hits:\n";
+
+  Array overall_hits_achieved_keys = overall_hits_achieved.keys();
+
+  for (int key_index = 0; key_index < overall_hits_achieved_keys.size();
+       key_index++) {
+    overall_hits_text +=
+        "Player " + String(overall_hits_achieved_keys[key_index]) + " (" +
+        String(mnchar_id_color_name_dict[String(
+            overall_hits_achieved_keys[key_index])]) +
+        "): " +
+        String::num_int64(
+            overall_hits_achieved[overall_hits_achieved_keys[key_index]]) +
+        "\n";
+  }
+
+  get_node<Hud>("Hud")->set_overall_hits_text(overall_hits_text);
+  get_node<Hud>("Hud")->update_constant_message();
+}
+
+void Main::generate_overall_wins_text() {
+  Array overall_wins_keys = overall_wins.keys();
+
+  String overall_wins_text = "\nOverall wins:\n";
+
+  for (int key_index = 0; key_index < overall_wins_keys.size(); key_index++)
+
+  {
+    overall_wins_text +=
+        "Player " + String(overall_wins_keys[key_index]) + " (" +
+        String(mnchar_id_color_name_dict[String(
+            overall_wins_keys[key_index])]) +
+        "): " + String::num_int64(overall_wins[overall_wins_keys[key_index]]) +
+        "\n";
+  }
+
+  get_node<Hud>("Hud")->set_overall_wins_text(overall_wins_text);
+  get_node<Hud>("Hud")->update_constant_message();
 }
