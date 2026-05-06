@@ -2060,11 +2060,187 @@ In addition, players might want to reset the hit and win stats on occasion. (For
 
 This part of the tutorial will add both of these features to the game using the Reset button that we've already added to our input map.
 
+1. We'll start by giving players the ability to exit out of a game. Within mnchar.h, add the following line at the end of the `private` section:
+
+    ```
+    double mnchar_game_reset_timer = 0.0;
+    ```
+
+1. Next, within mnchar.cpp's `_physics_process` function, add the following code right below `auto input = Input::get_singleton()`:
+
+    ```
+    if (input->is_action_pressed("reset_" + mnchar_id)) {
+        mnchar_game_reset_timer += delta;
+    } 
+    
+    else {
+        mnchar_game_reset_timer = 0.0;
+    }
+
+    if (mnchar_game_reset_timer >= 2.0) {
+        emit_signal("reset_game");
+    }
+    ```
+
+    As a result of this addition, if a given player's Reset button is pressed continuously for at least 2 seconds (causing `mnchar_game_reset_timer`'s value to reach 2.0), a "reset_game" signal will be emitted. If this button gets released before 2 seconds have passed, though, the `mnchar_game_reset_timer` will get set back to 0.0.)
+
+1. For this signal to get picked up successfully by other classes, it must be listed within `Mnchar::_bind_methods()`. You can do so by adding the following code right after the existing `ADD_SIGNAL` call within this function:
+
+    ```
+    ADD_SIGNAL(MethodInfo("reset_game"));
+    ```
+
+1. Open up main.h. Add `void _on_mnchar_reset_game();` to the end of this file's `public` section.
+
+1. Next, open main.cpp. Add the following code to the end of this file's `_bind_methods()` code:
+
+    ```
+    ClassDB::bind_method(D_METHOD("_on_mnchar_reset_game"),
+                        &Main::_on_mnchar_reset_game);
+    ```
+
+1. Next, add the following function definition to the very end of main.cpp:
+
+    ```
+    void Main::_on_mnchar_reset_game() {
+    Array hits_achieved_keys = hits_achieved.keys();
+
+    for (int key_index = 0; key_index < hits_achieved_keys.size(); key_index++)
+
+    {
+        String current_id = String(hits_achieved_keys[key_index]);
+        int current_id_hits_achieved = hits_achieved[current_id];
+
+        overall_hits_achieved[current_id] =
+            int(overall_hits_achieved[current_id]) - current_id_hits_achieved;
+    }
+
+
+    generate_overall_hits_text();
+    hits_achieved = TypedDictionary<String, int>{};
+    end_game("Nobody");
+    }
+    ```
+
+    This function first removes any hits scored within the current game from the overall-hits dictionary; that way, such hits won't count going forward. It then clears out the hits_achieved dictionary (so any hits within the game won't be reported within the between-game message); updates the game's overall-hits text; and calls end_game() without declaring any player the winner.
+
+1. This new code won't have any effect quite yet, as we haven't yet connected the `reset_game` signal emitted by the Mnchar to the Main class's corresponding function. To make this connection, add the following code right after `new_mnchar->connect("mnchar_hit", Callable(this, "_on_mnchar_mnchar_hit"));` within `Main::_on_hud_start_game`:
+
+    ```
+    new_mnchar->connect("reset_game", Callable(this, "_on_mnchar_reset_game"));
+    ```
+
+1. Compile your code, restart the Godot editor, and launch the game. Try hitting at least one, but not all players, with a given player; next, press and hold the reset button (e.g. 'O' on a QWERTY keyboard) to have Player 0 reset the game. You should see a 0 next to each player ID within the 'Overall hits' section of the constant-game message; in addition, you shouldn't see any hits from the game you just exited within the between-game message.
+
+1. We'll now allow players to reset the overall hit and win stats within the between-game menu. Within hud.h, add the following code to the end of the `private` section:
+
+    ```
+    TypedDictionary<String, double> id_reset_time_dict{
+        {"0", 0.0}, {"1", 0.0}, {"2", 0.0}, {"3", 0.0},
+        {"4", 0.0}, {"5", 0.0}, {"6", 0.0}, {"7", 0.0}};
+    ```
+
+  This dictionary will keep track of how long each player has continuously held down the reset button, thus allowing us to determine whether or not to reset the game's overall stats. I think hardcoding all eight possible IDs is acceptable here, as it
+  simplifies this section's code.
+
+1. Within hud.cpp, add the following set of code right before the line in `Hud::_process()` that reads `if ((input->is_action_pressed("fire_" + strint))`:
+
+    ```
+    if (input->is_action_pressed("reset_" + strint)) {
+    id_reset_time_dict[strint] = double(
+    id_reset_time_dict[strint]) + delta;
+    }
+
+    else {
+    id_reset_time_dict[strint] = 0.0;
+    }
+
+    if (double(id_reset_time_dict[strint]) >= 2.0)
+
+    {
+    emit_signal("reset_overall_stats");
+    id_reset_time_dict[strint] = 0.0;
+    }
+    ```
+
+    This code is similar to the reset-game code that we added within the Mnchar class. Note, however, that once a reset command has been triggered, that player's entry within the `id_reset_time_dict` will get reset to 0, thus preventing redundant signals from getting emitted.
+
+1. Still within hud.cpp, add `ADD_SIGNAL(MethodInfo("reset_overall_stats"));` to the bottom of your `Hud::_bind_methods()` function.
+
+1. Add `void _on_hud_reset_overall_stats();` to the end of main.h's `public` section.
+
+1. Within main.cpp, add the following code to the end of your `_bind_methods()` function:
+
+    ```
+    ClassDB::bind_method(D_METHOD("_on_hud_reset_overall_stats"),
+                         &Main::_on_hud_reset_overall_stats);
+    ```
+
+1. Add the following code to the end of main.cpp's `Main::_ready()` function:
+
+    ```
+    get_node<Hud>("Hud")->connect(
+        "reset_overall_stats",
+        Callable(this, "_on_hud_reset_overall_stats"));
+    ```
+
+    These steps are all quite similar to those you just took to implement your game-reset feature.
+
+1. Next, right after your `Main::end_game()` function in this same file, add the following code:
+
+    ```
+    void Main::_on_hud_reset_overall_stats()
+    {
+    overall_hits_achieved = TypedDictionary<String, int>{};
+    overall_wins = TypedDictionary<String, int>{};
+    generate_overall_hits_text();
+    generate_overall_wins_text();
+    }
+    ```
+
+    This function clears out our two overall-stats dictionaries, then updates our constant message accordingly.
+
+    Note that this setup only allows overall statistics to get reset outside of games (since, when a game is active, the Reset button will instead cause the player to exit the game).
+
+# Part 19: Finishing touches
+
+To conclude this tutorial, we'll add two finishing touches to the game that, while not strictly necessary, are well worth the minor effort they involve.
+
+First, you may have noticed that players can travel off the game area--and, indeed, outside the camera's view. To keep them within the lovely green square we've created, we'll now add walls around it. (The steps for creating these walls will be very similar to those we used to create the game area itself.) 
+
+1. Within your Godot editor, double-click on main.tscn, then select your Main node. Add a StaticBody3D child of this node and rename it RightWall. Add a CollisionShape3D as a child of RightWall.
+
+1. Set the CollisionShape3D's shape to a BoxShape3D. Open up this BoxShape3D's edit menu, and set its x, y, and z Size values to 1.0, 3.0, and 60.0, respectivey.
+
+1. Within the Transform section of the *RightWall's* Inspector menu, set the x and y Position values to -30.5 and 0.5, respectively. This should make the bottom of this wall flush with the bottom of the Ground object, and its inner side flush with the Ground object's edge.
+
+    ![](tutorial_screenshots/invisible_wall.png)
+
+1. Click 'Collision' within the CollisionObject3D section of this Inspector menu to open up the wall's Layer and Mask settings. Deselect the '1' from both the Layer and the Mask entries, then select the '5' within the Layer section.
+
+1. Double-click on mnchar.tscn. Within the CollisionObject3D section of the Mnchar's Inspector menu, select the '5' within the Mask section. This will cause the wall we just created to block the player's progress.
+
+1. Launch your game, then try to move a player past the right edge of the game area. The CollisionObject3D, though invisible, should successfully stop the player. (It won't stop projectiles, but you can configure that behavior also if you'd like.)
+
+1. We can certainly keep this wall invisible, but giving it a shape and color will be a nice aesthetic touch. Add a MeshInstance3D as a child of RightWall, then assign it a BoxMesh. Open up this BoxMesh's edit menu, then make the x, y, and z Size values equal to the corresponding CollisionShape3D's values (i.e. 1.0, 3.0, and 60.0, respectively). Within the Edit menu's Material section, create a new StandardMaterial3D. Open up the Albedo section within this sphere's Edit menu, then change the color to whatever you'd like. (I chose my wall color by flipping the R (32) and G (128) colors of my ground while keeping the B value (64) constant. Thus, my wall's R, G, and B values are 128, 32, and 64, respectively.)
+
+    Here's what this wall should look like at this point (though your color may vary):
+
+    ![](tutorial_screenshots/visible_wall.png)
+
+1. Now that we've created one wall, the other three will go much faster. Right click on your RightWall; select 'Duplicate'; and rename the new 'RightWall2' node that has appeared to 'LeftWall'. Within the Transform section of its Inspector, set the x position to 30.5.
+
+1. Create another duplicate of RightWall; name this one TopWall. Change its y rotation within its Inspector's Transform menu to 90.0 degrees; its x position to 0.0; and its z position to 30.5. In addition, within the edit menus of the CollisionShape3D's BoxShape3D *and* the MeshInstance3D's BoxMesh, increase the x size values from 60.0 to 62.0. (This will fill in the corners of your walls.)
+
+1. Finally, create a duplicate of TopWall; name it BottomWall; and change its z position within the Transform menu from 30.5 to -30.5.
+
+    Here's what your Main scene should look like now that all four walls have been added in:
+
+    ![](tutorial_screenshots/finished_walls.png)
+
 # Here with editing:
 
- Allow players to reset overall stats *and* games (while also removing the stats of reset games from your overall hit stats.) This will involve creating a few additional dictionaries.
-
-1. Create Part 19: Final enhancements. (1) add boundaries to the game area so players can't fall off (make sure to update your layer/mask settings accordingly), *and* (2) update projectile colors to match those of their firing Mnchar.
+(2) update projectile colors to match those of their firing Mnchar.
 
 
 ## Future editing notes

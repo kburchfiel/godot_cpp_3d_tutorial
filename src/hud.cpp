@@ -8,6 +8,8 @@ Hud::~Hud() {}
 void Hud::_bind_methods() {
   ADD_SIGNAL(MethodInfo("start_game",
                         PropertyInfo(Variant::ARRAY, "mnchars_to_include")));
+
+  ADD_SIGNAL(MethodInfo("reset_overall_stats"));
 }
 
 TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() {
@@ -78,6 +80,21 @@ void Hud::_process(double delta) {
                        String(mnchar_id_color_name_dict[strint]) +
                        ") to the game.\n";
       update_between_game_message();
+    }
+
+    if (input->is_action_pressed("reset_" + strint)) {
+      id_reset_time_dict[strint] = double(id_reset_time_dict[strint]) + delta;
+    }
+
+    else {
+      id_reset_time_dict[strint] = 0.0;
+    }
+
+    if (double(id_reset_time_dict[strint]) >= 2.0)
+
+    {
+      emit_signal("reset_overall_stats");
+      id_reset_time_dict[strint] = 0.0;
     }
 
     if ((input->is_action_pressed("fire_" + strint)) &&

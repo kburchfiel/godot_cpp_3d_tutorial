@@ -72,4 +72,7 @@ void generate_overall_hits_text();
 
 void generate_overall_wins_text();
 
+void _on_mnchar_reset_game();
+
+void _on_hud_reset_overall_stats();
 };

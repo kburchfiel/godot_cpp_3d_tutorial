@@ -32,12 +32,13 @@ void Mnchar::_bind_methods() {
                         PropertyInfo(Variant::STRING, "mnchar_id"),
                         PropertyInfo(Variant::STRING, "firing_mnchar_id")));
 
+  ADD_SIGNAL(MethodInfo("reset_game"));
+
   ClassDB::bind_method(D_METHOD("_on_projectile_detector_body_entered", "node"),
                        &Mnchar::_on_projectile_detector_body_entered);
 }
 
-Mnchar::Mnchar() {
-}
+Mnchar::Mnchar() {}
 
 Mnchar::~Mnchar() {}
 
@@ -88,8 +89,9 @@ void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
   set_mnchar_color(mnchar_color_arg);
   get_node<Node3D>("Pivot")->rotate_object_local(Vector3(0, 1, 0),
                                                  mnchar_rotation_arg);
-get_node<Area3D>("Projectile_Detector")->connect(
-"body_entered", Callable(this, "_on_projectile_detector_body_entered"));                                                 
+  get_node<Area3D>("Projectile_Detector")
+      ->connect("body_entered",
+                Callable(this, "_on_projectile_detector_body_entered"));
 }
 
 void Mnchar::shoot_projectile()
@@ -119,6 +121,19 @@ void Mnchar::_on_projectile_detector_body_entered(Node3D *node) {
 void Mnchar::_physics_process(double delta) {
 
   auto input = Input::get_singleton();
+
+  if (input->is_action_pressed("reset_" + mnchar_id)) {
+    mnchar_game_reset_timer += delta;
+  } 
+  
+  else {
+    mnchar_game_reset_timer = 0.0;
+  }
+
+  if (mnchar_game_reset_timer >= 2.0) {
+    emit_signal("reset_game");
+    UtilityFunctions::print("reset_game signal emitted within mnchar.cpp.");
+  }
 
   if ((input->is_action_just_pressed("fire_" + mnchar_id)) &&
       (input->is_action_pressed("reset_" + mnchar_id) == false)) {

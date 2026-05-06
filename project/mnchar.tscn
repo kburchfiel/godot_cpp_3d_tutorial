@@ -24,6 +24,7 @@ size = Vector3(2, 2, 2)
 
 [node name="Mnchar" type="Mnchar" unique_id=1778936489 groups=["mnchars"]]
 packed_scene = ExtResource("1_0j8lf")
+collision_mask = 17
 
 [node name="Pivot" type="Node3D" parent="." unique_id=1471396128]
 

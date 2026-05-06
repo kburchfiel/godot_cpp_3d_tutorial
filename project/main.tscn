@@ -12,6 +12,16 @@ albedo_color = Color(0.1254902, 0.5019608, 0.2509804, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_ig7tw"]
 material = SubResource("StandardMaterial3D_7dm0k")
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ig7tw"]
+size = Vector3(1, 3, 62)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0xm2m"]
+albedo_color = Color(0.5019608, 0.1254902, 0.2509804, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h2yge"]
+material = SubResource("StandardMaterial3D_0xm2m")
+size = Vector3(1, 3, 62)
+
 [node name="Main" type="Main" unique_id=1942144727]
 packed_scene = ExtResource("1_0xm2m")
 
@@ -40,3 +50,47 @@ transform = Transform3D(-1, 6.181724e-08, -6.181724e-08, 0, 0.70710677, 0.707106
 [node name="HudProcessTimer" type="Timer" parent="." unique_id=443314601]
 wait_time = 2.0
 one_shot = true
+
+[node name="RightWall" type="StaticBody3D" parent="." unique_id=2012429237]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 0.5, 0)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=400879655]
+shape = SubResource("BoxShape3D_ig7tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=876808792]
+mesh = SubResource("BoxMesh_h2yge")
+
+[node name="TopWall" type="StaticBody3D" parent="." unique_id=295729694]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0.5, 30.5)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TopWall" unique_id=560950935]
+shape = SubResource("BoxShape3D_ig7tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TopWall" unique_id=2033948680]
+mesh = SubResource("BoxMesh_h2yge")
+
+[node name="BottomWall" type="StaticBody3D" parent="." unique_id=390116107]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0.5, -30.5)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BottomWall" unique_id=761106834]
+shape = SubResource("BoxShape3D_ig7tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BottomWall" unique_id=1722735082]
+mesh = SubResource("BoxMesh_h2yge")
+
+[node name="LeftWall" type="StaticBody3D" parent="." unique_id=1635020049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 0.5, 0)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=66201270]
+shape = SubResource("BoxShape3D_ig7tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=205072449]
+mesh = SubResource("BoxMesh_h2yge")

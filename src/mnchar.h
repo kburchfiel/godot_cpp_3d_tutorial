@@ -23,6 +23,7 @@ private:
   double rotation_speed = 0.15;
   String mnchar_id = "";
   Ref<PackedScene> projectile_scene;
+  double mnchar_game_reset_timer = 0.0;
 
 protected:
   static void _bind_methods();

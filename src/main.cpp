@@ -19,6 +19,12 @@ void Main::_bind_methods() {
 
   ClassDB::bind_method(D_METHOD("_on_hud_process_timer_timeout"),
                        &Main::_on_hud_process_timer_timeout);
+
+  ClassDB::bind_method(D_METHOD("_on_mnchar_reset_game"),
+                       &Main::_on_mnchar_reset_game);
+
+  ClassDB::bind_method(D_METHOD("_on_hud_reset_overall_stats"),
+                       &Main::_on_hud_reset_overall_stats);
 }
 
 Main::Main() {}
@@ -51,8 +57,6 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
 
   UtilityFunctions::print("Current size of active_mnchars: ",
                           active_mnchars.size());
-
-
 
   if (active_mnchars.size() == 1) {
     String winning_mnchar = *active_mnchars.begin();
@@ -90,6 +94,8 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
 
     new_mnchar->connect("mnchar_hit", Callable(this, "_on_mnchar_mnchar_hit"));
 
+    new_mnchar->connect("reset_game", Callable(this, "_on_mnchar_reset_game"));
+
     new_mnchar->start(mnchar_id_arg, mnchar_translate_arg, mnchar_rotation_arg,
                       mnchar_color_arg);
 
@@ -119,7 +125,6 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
 
   generate_overall_hits_text();
   generate_overall_wins_text();
-
 }
 
 void Main::end_game(String winning_mnchar_id) {
@@ -158,6 +163,13 @@ is: " + winning_mnchar_id;
   get_node<Timer>("HudProcessTimer")->start();
 }
 
+void Main::_on_hud_reset_overall_stats() {
+  overall_hits_achieved = TypedDictionary<String, int>{};
+  overall_wins = TypedDictionary<String, int>{};
+  generate_overall_hits_text();
+  generate_overall_wins_text();
+}
+
 void Main::_on_hud_process_timer_timeout() {
   get_node<Hud>("Hud")->clear_mnchars_to_include();
   get_node<Hud>("Hud")->set_instructions_text(
@@ -184,6 +196,10 @@ void Main::_ready() {
       get_node<Hud>("Hud")->get_instructions());
 
   get_node<Hud>("Hud")->update_between_game_message();
+
+  get_node<Hud>("Hud")->connect(
+    "reset_overall_stats",
+    Callable(this, "_on_hud_reset_overall_stats"));
 }
 
 void Main::generate_overall_hits_text() {
@@ -217,12 +233,31 @@ void Main::generate_overall_wins_text() {
   {
     overall_wins_text +=
         "Player " + String(overall_wins_keys[key_index]) + " (" +
-        String(mnchar_id_color_name_dict[String(
-            overall_wins_keys[key_index])]) +
+        String(
+            mnchar_id_color_name_dict[String(overall_wins_keys[key_index])]) +
         "): " + String::num_int64(overall_wins[overall_wins_keys[key_index]]) +
         "\n";
   }
 
   get_node<Hud>("Hud")->set_overall_wins_text(overall_wins_text);
   get_node<Hud>("Hud")->update_constant_message();
+}
+
+void Main::_on_mnchar_reset_game() {
+  UtilityFunctions::print("_on_mnchar_reset_game called.");
+  Array hits_achieved_keys = hits_achieved.keys();
+
+  for (int key_index = 0; key_index < hits_achieved_keys.size(); key_index++)
+
+  {
+    String current_id = String(hits_achieved_keys[key_index]);
+    int current_id_hits_achieved = hits_achieved[current_id];
+
+    overall_hits_achieved[current_id] =
+        int(overall_hits_achieved[current_id]) - current_id_hits_achieved;
+  }
+
+  generate_overall_hits_text();
+  hits_achieved = TypedDictionary<String, int>{};
+  end_game("Nobody");
 }
