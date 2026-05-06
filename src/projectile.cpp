@@ -29,11 +29,30 @@ void Projectile::set_firing_mnchar_id(const String firing_mnchar_id_arg) {
 
 String Projectile::get_firing_mnchar_id() const { return firing_mnchar_id; }
 
-void Projectile::start(Transform3D transform, String firing_mnchar_id) {
+void Projectile::set_projectile_color(const Color projectile_color_arg) {
+  Ref<BaseMaterial3D> projectilebody_mesh_material_3d =
+      (get_node<Node3D>("Pivot")
+           ->get_node<MeshInstance3D>("Body")
+           ->get_mesh()
+           ->surface_get_material(0));
+
+  projectilebody_mesh_material_3d->set_albedo(projectile_color_arg);
+
+  get_node<Node3D>("Pivot")
+      ->get_node<MeshInstance3D>("Body")
+      ->get_mesh()
+      ->surface_set_material(0, Ref<Material>(projectilebody_mesh_material_3d));
+}
+
+
+void Projectile::start(const Transform3D transform, 
+const String firing_mnchar_id, const Color projectile_color_arg) {
 
   set_firing_mnchar_id(firing_mnchar_id);
 
   set_transform(transform);
+
+  set_projectile_color(projectile_color_arg);
 
   auto projectile_basis_z = Projectile::get_transform().get_basis()[2];
 

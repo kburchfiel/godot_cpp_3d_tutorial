@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://dbo77kkrpal05"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_akgne"]
+resource_local_to_scene = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_a85iw"]
+resource_local_to_scene = true
 material = SubResource("StandardMaterial3D_akgne")
 size = Vector3(0.25, 0.25, 1)
 

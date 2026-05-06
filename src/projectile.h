@@ -5,6 +5,8 @@
 #include <godot_cpp/classes/character_body3d.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/base_material3d.hpp>
+#include <godot_cpp/classes/mesh_instance3d.hpp>
 
 using namespace godot;
 
@@ -30,6 +32,10 @@ public:
   void set_firing_mnchar_id(const String firing_mnchar_id_arg);
   String get_firing_mnchar_id() const;
 
-  void start(Transform3D transform, String firing_mnchar_id);
+  void start(const Transform3D transform, const String firing_mnchar_id,
+             const Color projectile_color_arg);
+
+  void set_projectile_color(const Color projectile_color_arg);
+
   void _physics_process(double delta) override;
 };

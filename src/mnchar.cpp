@@ -105,7 +105,16 @@ void Mnchar::shoot_projectile()
 
   projectile_transform =
       projectile_transform.translated_local(Vector3(0, 0, 3));
-  projectile->start(projectile_transform, mnchar_id);
+
+
+  Ref<BaseMaterial3D> mncharbody_mesh_material_3d =
+      (get_node<Node3D>("Pivot")
+           ->get_node<MeshInstance3D>("Body")
+           ->get_mesh()
+           ->surface_get_material(0));
+
+  projectile->start(projectile_transform, mnchar_id,
+  mncharbody_mesh_material_3d->get_albedo());
   get_parent()->add_child(projectile);
 }
 

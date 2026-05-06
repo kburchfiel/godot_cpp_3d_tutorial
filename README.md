@@ -785,7 +785,7 @@ It's neat to move our Mnchar around with code, but the game won't be too much fu
     void set_firing_mnchar_id(const String firing_mnchar_id_arg);
     String get_firing_mnchar_id() const;
 
-    void start(Transform3D transform, String firing_mnchar_id);
+    void start(const Transform3D transform, const String firing_mnchar_id);
     void _physics_process(double delta) override;
     };
 
@@ -834,7 +834,7 @@ It's neat to move our Mnchar around with code, but the game won't be too much fu
 1. Add the following code right below your existing projectile.cpp code:
 
     ```
-    void Projectile::start(Transform3D transform, String firing_mnchar_id) {
+    void Projectile::start(const Transform3D transform, const String firing_mnchar_id) {
 
     set_firing_mnchar_id(firing_mnchar_id);
 
@@ -2238,14 +2238,78 @@ First, you may have noticed that players can travel off the game area--and, inde
 
     ![](tutorial_screenshots/finished_walls.png)
 
-# Here with editing:
+1. Finally, we'll make Projectile colors equal to those of the Mnchars who are firing them. This will make it easier to identify which projectiles came from which players--but, more importantly, it looks cool. (Our code for updating Projectile colors will be very similar to our code for updating Mnchar colors.)
 
-(2) update projectile colors to match those of their firing Mnchar.
+1. Open up projectile.h. At the bottom of your `#include` statements, add:
 
+    ```
+    #include <godot_cpp/classes/base_material3d.hpp>
+    #include <godot_cpp/classes/mesh_instance3d.hpp>
+    ```
+
+Next, add `Color projectile_color_arg` as a third parameter to your `start()` function. The declaration should now appear as follows:
+
+    ```
+    void start(const Transform3D transform, const String firing_mnchar_id,
+                const Color projectile_color_arg);
+    ```
+
+1. In addition, add `void set_projectile_color(const Color projectile_color_arg);` after this `start()` function.
+
+1. Within projectile.cpp, add the following function definition right above `void Projectile::start()`:
+
+    ```
+    void Projectile::set_projectile_color(const Color projectile_color_arg) {
+    Ref<BaseMaterial3D> projectilebody_mesh_material_3d =
+        (get_node<Node3D>("Pivot")
+            ->get_node<MeshInstance3D>("Body")
+            ->get_mesh()
+            ->surface_get_material(0));
+
+    projectilebody_mesh_material_3d->set_albedo(projectile_color_arg);
+
+    get_node<Node3D>("Pivot")
+        ->get_node<MeshInstance3D>("Body")
+        ->get_mesh()
+        ->surface_set_material(0, Ref<Material>(projectilebody_mesh_material_3d));
+    }
+    ```
+
+    This is essentially the same function as `Mnchar::set_mnchar_color()` within main.cpp. I simply replaced 'Mnchar'/'mnchar' substrings with 'Projectile'/'projectile'.
+
+1. Still within main.cpp, add `const Color projectile_color_arg` as a third argument to your `void Projectile::start()` function definition. Next, below `set_transform(transform);` within this definition, add `set_projectile_color(projectile_color_arg);`.
+
+1. Now navigate over to mnchar.cpp. Within `Mnchar::shoot_projectile()`, add the following code right before this function's `projectile->start()` call:
+
+    ```
+    Ref<BaseMaterial3D> mncharbody_mesh_material_3d =
+        (get_node<Node3D>("Pivot")
+            ->get_node<MeshInstance3D>("Body")
+            ->get_mesh()
+            ->surface_get_material(0));
+    ```
+
+1. Next, at the end of your projectile-> start() call, add `mncharbody_mesh_material_3d->get_albedo()` as a third argument. This way, the Mnchar's color will also get assigned to the projectiles that it fires.
+
+    (An alternative approach here would have been to store the Mnchar's initial color argument (passed to it by main.cpp) as a Color variable, then pass that variable to `projectile->start()`. This would save us the trouble of retrieving the Mnchar's current color; however, the approach I took will also allow any updates to the Mnchar's color to also get reflected within the color of its projectiles.)
+
+1. Open up your Godot editor; double-click on Projectile.tscn; select the Projectile's Body node; and open up the Mesh's edit menu. Within this menu, navigate down to the Resource section and check the box next to 'Local to Scene.' Similarly, within the Mesh's Material's edit menu, go down to the Resource option and check *that* 'Local to Scene' box as well. (This will prevent changes to one projectile's color from affecting all other projectiles within the scene.)
+
+1. Launch your game, then try firing different Projectiles from different Mnchars. The color of each Mnchar's Projectiles should match its own color; in addition, Projectile colors fired by one Mnchar should not change to match those fired by another Mnchar.
+
+    ![](/tutorial_screenshots/firing_multicolored_projectiles.png)
+
+## Part 20: Exporting the game
+
+# Here with editing: Show how to export this game (which will also involve creating a release version of your godot-cpp file).
+
+## The end
+
+**Congratulations!** You have now programmed a multiplayer 3D game in C++ using Godot and its GDExtension feature.
 
 ## Future editing notes
 
-1. Try to make as many items `const` as possible.
+1. Try to make as many items `const` as possible. You can also make functions `const` as well as long as they don't modify the class; see p. 50 of A Tour of C++ (2nd edition).
 
 
 ## References
