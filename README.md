@@ -2140,8 +2140,7 @@ This part of the tutorial will add both of these features to the game using the 
         {"4", 0.0}, {"5", 0.0}, {"6", 0.0}, {"7", 0.0}};
     ```
 
-  This dictionary will keep track of how long each player has continuously held down the reset button, thus allowing us to determine whether or not to reset the game's overall stats. I think hardcoding all eight possible IDs is acceptable here, as it
-  simplifies this section's code.
+    This dictionary will keep track of how long each player has continuously held down the reset button, thus allowing us to determine whether or not to reset the game's overall stats. I think hardcoding all eight possible IDs is acceptable here, as it simplifies this section's code.
 
 1. Within hud.cpp, add the following set of code right before the line in `Hud::_process()` that reads `if ((input->is_action_pressed("fire_" + strint))`:
 
@@ -2247,7 +2246,7 @@ First, you may have noticed that players can travel off the game area--and, inde
     #include <godot_cpp/classes/mesh_instance3d.hpp>
     ```
 
-Next, add `Color projectile_color_arg` as a third parameter to your `start()` function. The declaration should now appear as follows:
+1. Next, add `Color projectile_color_arg` as a third parameter to your `start()` function. The declaration should now appear as follows:
 
     ```
     void start(const Transform3D transform, const String firing_mnchar_id,
