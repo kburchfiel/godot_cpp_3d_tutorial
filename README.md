@@ -1,4 +1,4 @@
-# Godot CPP 3D Tutorial
+# Cube Combat: A Godot C++ 3D Tutorial
 
 By Ken Burchfiel
 
@@ -6,9 +6,29 @@ Tutorial and code released under the MIT license. (See License.md file for more 
 
 *Note: Both the code and the documentation were created without the use of generative-AI tools.*
 
-This step-by-step guide will demonstrate how to create a 3D multiplayer game in Godot using C++. It is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved, both within your code editor and Godot, to put this kind of game together.
+![](tutorial_screenshots/gameplay_demo.gif)
 
-## Part 1: Getting started
+## Introduction
+
+This guide demonstrates how to create a 3D multiplayer game in Godot using C++. It has a number of advantages for newcomers to Godot and GDExtension:
+
+* It explains code and editor tasks step-by-step, thus making it easier to learn how to put a game together.
+
+* It also provides references for various code and editor tasks, thus (hopefully) demystifying the process of finding relevant C++ code for your own projects.
+
+* It notes potential pitfalls you might encounter along the way, along with tips for resolving them.
+
+The tutorial is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved to put the game together.
+
+*Note: I am still quite new to GDExtension, and my C++ skills are still developing as well--so this project and its corresponding source code likely have lots of room for improvement. However, they should still help both new and experienced developers become acquainted with C++ development in Godot. After all, an imperfect example is (generally) better than no example at all!*
+
+![](tutorial_screenshots/final_8_player_projectile_firing.png)
+
+(A look at the finished game)
+
+## Tutorial
+
+### Part 1: Getting started
 
 (Note: Many of these steps will resemble those in the excellent 'Getting started' section of the official GDExtension documentation at https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html . Certain code blocks within this section derive from that document as well.)
 
@@ -139,7 +159,7 @@ This step-by-step guide will demonstrate how to create a 3D multiplayer game in 
 
 1. Although we haven't created any classes yet, this will be a good time to compile the code we've added in so far. Navigate to your root folder and then run `scons platform=[your_os]` (e.g. `scons platform=linux` in my case). This is the same command you used to compile godot-cpp--just in your project folder rather than the godot-cpp folder. You should see `scons: done building targets.` appear in the terminal after all files have been compiled and linked.
 
-## Part 2: Adding in a class
+### Part 2: Adding in a class
 
 Now that we've gotten those setup tasks out of the way, we can begin programming our own GDExtension classes. Let's start with the Main class, which will govern the game area and some fundamental gameplay logic.
 
@@ -220,7 +240,7 @@ Now that we've gotten those setup tasks out of the way, we can begin programming
 
 1. Go ahead and run `scons platform=[your_os]` again. (If you haven't closed your terminal since the last time you ran this command, you may be able to access this line by pressing your Up Arrow key.) You should again see `scons: done building targets.` once the compilation process completes.
 
-## Part 3: Setting up main.tscn
+### Part 3: Setting up main.tscn
 
 Now that we have a class (albeit a very simple one), we can create a scene based on it. 
 
@@ -262,7 +282,7 @@ Now that we have a class (albeit a very simple one), we can create a scene based
 
 1. Now that we have a game scene in place, this will be a good time to begin work on our Mnchar (main character) class. There's plenty more C++ code that will get added to main.cpp and main.h, but those additions will be easier to implement and debug once we have actual characters and projectiles to manage.
 
-## Part 4: Laying the foundations for our Mnchar class
+### Part 4: Laying the foundations for our Mnchar class
 
 Our Mnchar class, which players will be able to control via game controllers, will fire projectiles and (potentially) get hit by other projectiles. We'll eventually configure our game such that anywhere from 2-8 Mnchars can get added to the game scene at the start of each game; however, that configuration will involve a Hud class that we won't be setting up for a little while.
 
@@ -367,7 +387,7 @@ Our Mnchar class, which players will be able to control via game controllers, wi
 
 1. *Now* run `scons platform=[your_os]` to compile this new Mnchar-related code. In my case, the editor still didn't show the Mnchar class within the 'Create New Node' menu after this step, but it did present it once I closed and relaunched my editor. Thus, I'd recommend that you do the same at this point.
 
-## Part 5: Setting up mnchar.tscn
+### Part 5: Setting up mnchar.tscn
 
 1. Back in the editor, create a new scene. Click the 'Other Node' button under the 'Create Root Node:' prompt; search for 'Mnchar'; then double-click it. Next, save this scene as mnchar.tscn.
 
@@ -417,7 +437,7 @@ Our Mnchar class, which players will be able to control via game controllers, wi
 
     Close out of the input map and save your mnchar.tscn file.
 
-## Part 6: Adding a Mnchar to the game area
+### Part 6: Adding a Mnchar to the game area
 
 We're almost ready to add in code that will let us move our Mnchar around the game area. First, though, we need to *add* the Mnchar to the game area.
 
@@ -548,7 +568,7 @@ One option would be to instantiate a Mnchar as a child scene of main.tscn (Refer
 
     ![](tutorial_screenshots/repositioned_mnchar.png)
 
-## Part 7: Moving the Mnchar
+### Part 7: Moving the Mnchar
 
 Because we're creating a multiplayer game, we'll want to set up our movement code in a way that allows each player to move his or her own Mnchar (and no one else's). The approach we'll take for this task will be as follows:
 
@@ -724,7 +744,7 @@ Because we're creating a multiplayer game, we'll want to set up our movement cod
 
     By the way: if the game crashes right when you launch it, make sure that your mnchar.tscn scene is still present within Main's Packed Scene attribute. (It sometimes disappears on my end, but thankfully, it's easy to add back in.)
 
-## Part 8: Creating a projectile
+### Part 8: Creating a projectile
 
 It's neat to move our Mnchar around with code, but the game won't be too much fun without anything for it to fire (or be hit by). Therefore, let's go ahead and add a Projectile class to our game. This class will have many similarities to the Mnchar class (on which its code will be based). 
 
@@ -848,7 +868,7 @@ It's neat to move our Mnchar around with code, but the game won't be too much fu
 
 1. We'l have more to add to our Projectile class's code later on, but what we have so far will at least let us create a Projectile scene within our editor. Go ahead and compile your code, then restart your editor.
 
-## Part 9: Adding a projectile scene
+### Part 9: Adding a projectile scene
 
 1. Select Scene --> New Scene; click 'Other Node' under the 'Create Root Node:' text; and search for your new Projectile class. Once you've found it, select it and hit 'Create.' Go ahead and save this near-empty scene as projectile.tscn.
 
@@ -858,7 +878,7 @@ It's neat to move our Mnchar around with code, but the game won't be too much fu
 
 ![](tutorial_screenshots/projectile_scene.png)
 
-## Part 10: Allowing Mnchars to fire projectiles
+### Part 10: Allowing Mnchars to fire projectiles
 
 Next, we'll need to add code for firing projectiles to our Mnchar class. 
 
@@ -945,7 +965,7 @@ Next, we'll need to add code for firing projectiles to our Mnchar class.
 
 ![](tutorial_screenshots/firing_projectiles.png)
 
-## Part 11: Adding a second Mnchar to the scene
+### Part 11: Adding a second Mnchar to the scene
 
 Now that we've added code for firing a projectile, we'll also need to create code that specifies how the game should react when a Mnchar gets hit by a projectile. But in order to test out that code, we'll need to add a second Mnchar to the scene. 
 
@@ -1115,7 +1135,7 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
 
 1. As the blue Mnchar, try firing some projectiles towards the green Mnchar by pressing the space bar. (If the game crashes when you attempt to do so, make sure that your projectile.tscn is still showing up within the Mnchar's Packed Scene entry; if it's missing, load it back in.) You should see the projectiles stop in place when they reach the green Mnchar, though if enough of them get fired, it might shift it around a bit. We'll now change this behavior so that a Mnchar who gets hit by a projectile gets removed from the game scene.
 
-## Part 12: Detecting collisions
+### Part 12: Detecting collisions
 
 1. In order to determine when a Mnchar has gotten hit, we'll need to add an Area3D node that can detect such collisions. Go ahead and add such a node as a child of your Mnchar, then rename it 'Projectile_Detector.' Next, add a CollisionShape3D as a child of Projectile_Detector; click on the 'empty' text next to the Shape section within its Inspector menu; and choose a BoxShape3D. Click on the 'BoxShape3D' text to enter the edit menu, then set the x, y, and z sizes to 2.0 meters. (Reference 41)
 
@@ -1191,7 +1211,7 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
 
     If you compile your code once again and restart the game, you should still be able to remove another Mnchar from the game by hitting it with a projectile, even if the editor doesn't show a connection between the Projectile_Detector's `body_entered` signal and the Mnchar's `_on_projectile_detector_body_entered` function.
 
-## Part 13: Ending the game
+### Part 13: Ending the game
 
 We're very close to having a working prototype of our game--one in which two players can attempt to hit one another with projectiles. Unless both players hit each other at the same time, we should be able to figure out who won (e.g. by seeing which player is left standing). However, it will be ideal to have the game determine this as well.
 
@@ -1339,7 +1359,7 @@ We're very close to having a working prototype of our game--one in which two pla
 
 1. Compile your code, restart Godot, and play your main scene. When you hit one Mnchar with another, both Mnchars should be removed from the game area.
 
-## Part 14: Adding a heads-up display (HUD) class
+### Part 14: Adding a heads-up display (HUD) class
 
 Congratulations! You now have a working 3D multiplayer game in C++. After launching the game, you and a friend or family member can try hitting each other's Mnchar with a projectile; once one of you succeeds, the console will announce a winner, and the game will end. You can then restart the scene to play again.
 
@@ -1476,7 +1496,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
 
 1. Finally, go back into register_types.cpp in order to inform Godot of this new class. You can probably guess at this point which two lines to include, but in case you need a refresher: add `#include "hud.h"` below `#include "projectile.h"` near the top, and `GDREGISTER_RUNTIME_CLASS(Hud);` below `GDREGISTER_RUNTIME_CLASS(Projectile);` within `initialize_example_module()`.
 
-## Part 15: Configuring hud.tscn and extending the Hud class
+### Part 15: Configuring hud.tscn and extending the Hud class
 
 1. Compile your code, then restart your editor. As you did with your other three scenes, click on Scene --> New Scene; select 'Other Node' within the 'Create Root Node' menu; choose your newly-created Hud class; and then save this scene as hud.tscn. (This will be the last scene that we add within this tutorial.)
 
@@ -1638,7 +1658,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
 
     ![](tutorial_screenshots/launching_8_player_game.png)
 
-## Part 16: Handling end-of-game tasks
+### Part 16: Handling end-of-game tasks
 
 We can now launch our game with an arbitrary number of players. However, we also need to allow players to return to the game-setup menu once a game is complete.
 
@@ -1724,7 +1744,7 @@ We can now launch our game with an arbitrary number of players. However, we also
 
     We're not far from finishing the game at this point! However, we still need to add a few more UI elements, including running overall stats totals--and allow players to reset both those stats totals and active games.
 
-## Part 17: Further expanding our UI
+### Part 17: Further expanding our UI
 
 Right now, we're referring to players using integers. However, these numbers won't make much sense to players on their own. Therefore, we'll add in a dictionary that allows players' colors to be displayed together with their IDs.
 
@@ -1898,13 +1918,17 @@ Right now, we're referring to players using integers. However, these numbers won
 
     1. You may also want to verify that, if you launch a follow-up game with a new set of players, only those players (and not any who were removed after the first game) show up within these post-game hit stats.
 
-1. While you're within the editor, Go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Autowrap value to Word. We'll make use of this new label very soon.
+1. While you're within the editor, Go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Autowrap value to Word and its Horizontal Alignment to Right. We'll make use of this new label very soon.
 
 1. This label will get displayed on the right side of the screen so as not to overlap with the between-game message. However, before we can set its specific location, we should first expand the game window to full-HD dimensions. Go to Project --> Project Settings, then select the Display-->Window section within the menu on the left. Change the Viewport Width and Viewport Height options within the Window menu to 1920 and 1080, respectively. 
 
     (You're welcome to choose smaller dimensions in order to allow your game to display on smaller monitors; you'll just then need to modify certain label settings specified in this tutorial in order to make them compatible with these custom dimensions.)
 
-1. Next, within the Layout section of the ConstantLabel's Inspector window, set the Size's x value to 250.0 pixels. In addition, set the Position's x and y values to 1650.0 and 20.0 pixels, respectively. (1920 - 250 - 20 (the same buffer we're using for our BetweenGameLabel) equals 1650.) These options should provide enough room for each statistic to appear within a single line while preventing text from overlapping with the game area, at least within normal gameplay durations.
+1. Next, within the Layout section of the ConstantLabel's Inspector window, set the Anchors Preset option to 'Full Rect.' This will allow the text to stay near the right edge of the screen even if it's resized to a different value. (Reference 59)
+
+1. The 'Full Rect' selection should have changed your x and y Size values to 1920.0 px and 1080.0 px, respectively. Change the x Size value to 1900, thus providing a bit of a buffer between the right edge of the text and the right side of the window. Similarly, change the y Position value to 20.0 px in order to create a buffer between this text and the top of the window.
+
+    ![](tutorial_screenshots/ConstantLabel_settings.png)
 
     *Note: Many of the screenshots in this tutorial reflect an earlier set of text options--so don't worry if the ConstantLabel text within your game doesn't match these screenshots.*
 
@@ -2035,7 +2059,7 @@ Right now, we're referring to players using integers. However, these numbers won
 
     Although a larger font size would have been useful, the 20-pixel size we chose allows all of this text to fit within the screen, *and* prevents the constant text from overlapping with the game area, which would be a major distraction for players.
 
-## Part 18: Adding in reset options
+### Part 18: Adding in reset options
 
 In certain cases (and not just because they lost!), players may wish to exit out of an active game. For example, it's currently possible to add just one player to a game; this would result in a 'softlock' (https://en.wiktionary.org/wiki/softlock), as there's no way to exit out of this round without shutting down the game. 
 
@@ -2184,7 +2208,7 @@ This part of the tutorial will add both of these features to the game using the 
 
     Note that this setup only allows overall statistics to get reset outside of games (since, when a game is active, the Reset button will instead cause the player to exit the game).
 
-# Part 19: Finishing touches
+### Part 19: Finishing touches
 
 To conclude this tutorial, we'll add two finishing touches to the game that, while not strictly necessary, are well worth the minor effort they involve.
 
@@ -2281,11 +2305,11 @@ First, you may have noticed that players can travel off the game area--and, inde
 
     ![](/tutorial_screenshots/firing_multicolored_projectiles.png)
 
-## Part 20: Exporting the game
+### Part 20: Exporting the game
 
 1. In order to make the game easier to distribute, it will be helpful to create a single-file release version. The first step is to create a release verison of your code. Navigate to your project's root folder in your terminal (e.g. the same folder from which you normally compile your code), then run the following command:
 
-```scons platform=linux target=template_release```
+    ```scons platform=linux target=template_release```
 
     (Replace 'linux' with your own operating system if needed.)
 
@@ -2303,14 +2327,76 @@ First, you may have noticed that players can travel off the game area--and, inde
 
 1. To make these two files easier to share, you may want to compress them into a .zip file. Note that the game will *not* work correctly if the shared library isn't in the same folder as the executable.
 
-## The end
+    ![](tutorial_screenshots/8_player_gameplay.png)
+
 
 **Congratulations!** You have now programmed a multiplayer 3D game in C++ using Godot and its GDExtension feature. I had a lot of fun putting this game and tutorial together, and I hope it helps you in your future programming endeavors!
 
-    --Ken Burchfiel
+--Ken Burchfiel
+
+![](tutorial_screenshots/20260414_ken.jpg)
 
 
-## References
+## Appendix
+
+## Launching the game
+
+If you'd like to preview the game before starting the tutorial, you can do so either by downloading a Linux binary or by cloning this repository.
+
+### From itch.io
+
+​To run this game, download the .zip file (together with the Readme) from https://kburchfiel.itch.io/cube-combat; unzip it; and double-click on the executable (Cpp 3D Tutorial.x86_64) in order to run it. At this time, an executable is only available for Linux.
+
+*From GitHub:*
+
+Clone this repository; copy a compiled version of the godot-cpp library into a 'godot-cpp' folder within the repository; and then compile this folder itself by running scons. (Note: I haven't yet tested out this setup, but it *should* work.)
+
+### Gameplay instructions
+
+#### Goal
+
+In this 3rd-person-shooter game, your goal is to outlast all other players. This will involve both hitting other players and avoiding their own projectiles. It only takes one hit to remove a player from the map, so be careful!
+
+The game will also keep track of each player's overall win and hit count, though these can also be reset as needed (see below).
+
+#### Controls
+
+This game, being multiplayer-only, is meant to be played with game controllers such as Nintendo Switch Pro Controllers (which I used for testing purposes). The keyboard commands built into the input map are really just meant for development and debugging.
+
+(The following commands may vary among controllers. You can of update them within the Godot editor as needed.)
+
+#### Within the player-selection menu
+
+* Right trigger: Join a game
+
+* Launch a game: Hold down left and right trigger at the same time
+
+* Holding down the left trigger for two or more seconds will reset all overall hit and win stats.
+
+* Note: If you accidentally add a player to the game, simply launch and reset the game to return to this menu. (See below for more details)
+
+#### Within a live game
+
+* Fire: Right trigger. (This command will not work if the left trigger is also being held down.)
+
+* Move forward and back: Left joystick (up/down)
+
+* Strafe left and right: Left joystick (left/right)
+
+* Rotate left and right: Right joystick (left/right)
+
+* Holding down the left trigger for three or more seconds will return you to the player-selection menu while removing all hits scored in the current game from the overall-stats dictionary.
+
+#### Tips
+
+* When first starting a round, I suggest launching a practice round so that everyone can get acquainted with his or her controls. You can then reset out of this round (without having it affect your stats) by holding down the left trigger for three or more seconds.
+
+* There are currently no limits on (1) how quickly you can fire projectiles or (2) how many you can fire within a game. I might update these settings within future versions of the game, though.
+
+* There's no music--but feel free to play your own tracks in the background!
+
+
+### References
 
 Notes: 
 
@@ -2318,7 +2404,7 @@ Notes:
 
 * In addition, references that begin with '/godot-cpp' refer to a file within a *compiled* godot-cpp repository. (See Part 1 for more details on (1) how to access and compile this repository and (2) the exact version I'm using.)
 
-* Not all references are listed within every paragraph. For instance, if multiple paragraphs in a row use the same reference, I might only cite that reference within some of those paragraphs.
+* Not all references are listed within every paragraph. For instance, if multiple paragraphs in a row use the same reference, I might only cite that reference within some of those paragraphs. In addition, once I've introduced a reference for a certain set of code (e.g. iterating through a TypedDictionary), I generally won't include it a second time.
 
 * Reference 1: https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html
 
@@ -2441,3 +2527,39 @@ Notes:
 * Reference 57: https://docs.godotengine.org/en/stable/engine_details/development/compiling/compiling_for_linuxbsd.html
 
 * Reference 58: https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html
+
+* Reference 59:
+
+### Finding C++ code equivalents to GDScript code
+
+(This was originally written for my Godot C++ 3D Demo project (Reference 2)).
+
+When first getting acquainted with C++ in Godot, you might wonder how you can find C++ code equivalents for the GDScript code found within tutorials and other documentation materials. My search for a C++-based CharacterBody3D class shows what this process might look like for you. 
+
+Since Godot's Your First 3D Game (YF3DG) tutorial has GDScript and C# (but not C++) code excerpts, I first needed to double-check the name for this class within the C++ API. A content search within my godot-cpp library for 'characterbody' turned up two relevant code files: 
+
+    * godot_cpp/classes/character_body3d.hpp (I needed to include this file within the C++ code for my main-character file.)
+
+    * godot-cpp/gen/src/classes/character_body3d.cpp
+
+Using these files, I was able to confirm that this class is also titled CharacterBody3D within the C++ API. I also confirmed that this class has the `move_and_slide()` function referenced within YF3DG. (A content search for `move_and_slide` would also have helped me locate the character_body3d.cpp file.)
+
+Once you become more familiar with the godot-cpp library, you may be able to bypass the process of looking up GDScript code by going directly to a particular source file of interest. For instance, to learn how to erase an entry from a HashSet, you can simply go to godot-cpp/include/godot_cpp/templates/hash_set.hpp and check for a relevant method or function (e.g. '`erase()`'). In many cases, a function for a GDExtension type may be similar to a C++ STL function (as is the case with `erase()`: see https://en.cppreference.com/w/cpp/container/set/erase.html .)
+
+Remember that a given function might be available within a class's parent. For example, you won't find `has()` within typed_dictionary.hpp, but you *will* find it within `dictionary.hpp` (godot-cpp/gen/include/godot_cpp/variant/dictionary.hpp).
+
+Certain C++ API code, however, may not have any GDScript equivalent. In that case, you may need to instead look at the reference information for the Godot Engine's own source code--or directly at the code itself. For example, the Core Types page (https://docs.godotengine.org/en/stable/engine_details/architecture/core_types.html) was a huge help when adding dictionaries and sets into my code.
+
+Of course, existing code that makes use of the C++ API can be very useful as well. For instance, the source code for the 'test' section of the godot-cpp project (https://github.com/godotengine/godot-cpp/tree/master/test/src), such as the example.cpp file (https://github.com/godotengine/godot-cpp/blob/master/test/src/example.cpp), was a lifesaver when I was trying to figure out how to get a TypedDictionary to work with my project. See the 'References and resources' section near the top of this page for more examples.
+
+The gdnative-gdextension channel within the Godot-engine Discord (https://discord.com/invite/godotengine) is another great resource to bookmark. I'm very grateful to the participants who helped clarify the questions I asked of them there.
+
+### Don't give up!
+
+I certainly went through periods of frustration when working on this project. The game would crash without my understanding why; a seemingly-simple update took much longer than expected to implement; documentation on essential processes seemed hard to come by. However, as time went on, I found my confidence with C++--and my understanding of the editor--slowly building. 
+
+My personal belief is that these challenges are actually a crucial step towards gaining expertise in the language. It would have been nice to find answers right away, of course, but the hours I spent on debugging and testing helped me become much more acquainted with the editor. Plus, it felt *so good* once things finally worked!
+
+So, if you find yourself going through challenges and frustrations of your own, don't give up--and remember that those challenges will make you a stronger developer in the end.
+
+Saint Carlo Acutis, Pray for us!
