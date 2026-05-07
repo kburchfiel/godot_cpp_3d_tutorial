@@ -2538,9 +2538,9 @@ When first getting acquainted with C++ in Godot, you might wonder how you can fi
 
 Since Godot's Your First 3D Game (YF3DG) tutorial has GDScript and C# (but not C++) code excerpts, I first needed to double-check the name for this class within the C++ API. A content search within my godot-cpp library for 'characterbody' turned up two relevant code files: 
 
-    * godot_cpp/classes/character_body3d.hpp (I needed to include this file within the C++ code for my main-character file.)
+* godot_cpp/classes/character_body3d.hpp (I needed to include this file within the C++ code for my main-character file.)
 
-    * godot-cpp/gen/src/classes/character_body3d.cpp
+* godot-cpp/gen/src/classes/character_body3d.cpp
 
 Using these files, I was able to confirm that this class is also titled CharacterBody3D within the C++ API. I also confirmed that this class has the `move_and_slide()` function referenced within YF3DG. (A content search for `move_and_slide` would also have helped me locate the character_body3d.cpp file.)
 
