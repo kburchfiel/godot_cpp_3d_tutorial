@@ -2528,7 +2528,7 @@ Notes:
 
 * Reference 58: https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html
 
-* Reference 59:
+* Reference 59: https://forum.godotengine.org/t/making-a-textbox-that-scales-with-screen-size/74350/4?u=kburchfiel
 
 ### Finding C++ code equivalents to GDScript code
 
