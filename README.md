@@ -20,6 +20,8 @@ This guide demonstrates how to create a 3D multiplayer game in Godot using C++ a
 
 The tutorial is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved to put the game together.
 
+I created the tutorial using Godot 4.6, but it will (hopefully) still work well for subsequent editions of Godot.
+
 *Note: I am still quite new to GDExtension, and my C++ skills are still developing as well--so this project and its corresponding source code likely have lots of room for improvement. However, they should still help both new and experienced developers become acquainted with C++ development in Godot. After all, an imperfect example is (generally) better than no example at all!*
 
 ![](tutorial_screenshots/final_8_player_projectile_firing.png)
