@@ -10,7 +10,7 @@ Tutorial and code released under the MIT license. (See License.md file for more 
 
 ## Introduction
 
-This guide demonstrates how to create a 3D multiplayer game in Godot using C++. It has a number of advantages for newcomers to Godot and GDExtension:
+This guide demonstrates how to create a 3D multiplayer game in Godot using C++ and GDExtension. It has a number of advantages for newcomers to Godot and GDExtension:
 
 * It explains code and editor tasks step-by-step, thus making it easier to learn how to put a game together.
 
