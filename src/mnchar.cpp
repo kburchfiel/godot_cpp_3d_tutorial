@@ -81,10 +81,11 @@ void Mnchar::set_mnchar_color(const Color mnchar_color_arg) {
       ->surface_set_material(0, Ref<Material>(mncharbody_mesh_material_3d));
 }
 
-void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
-                   double mnchar_rotation_arg, Color mnchar_color_arg) {
+void Mnchar::start(const String mnchar_id_arg,
+                   const Vector3 mnchar_translate_arg,
+                   const double mnchar_rotation_arg,
+                   const Color mnchar_color_arg) {
   set_mnchar_id(mnchar_id_arg);
-  UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
   translate(mnchar_translate_arg);
   set_mnchar_color(mnchar_color_arg);
   get_node<Node3D>("Pivot")->rotate_object_local(Vector3(0, 1, 0),
@@ -106,7 +107,6 @@ void Mnchar::shoot_projectile()
   projectile_transform =
       projectile_transform.translated_local(Vector3(0, 0, 3));
 
-
   Ref<BaseMaterial3D> mncharbody_mesh_material_3d =
       (get_node<Node3D>("Pivot")
            ->get_node<MeshInstance3D>("Body")
@@ -114,13 +114,11 @@ void Mnchar::shoot_projectile()
            ->surface_get_material(0));
 
   projectile->start(projectile_transform, mnchar_id,
-  mncharbody_mesh_material_3d->get_albedo());
+                    mncharbody_mesh_material_3d->get_albedo());
   get_parent()->add_child(projectile);
 }
 
 void Mnchar::_on_projectile_detector_body_entered(Node3D *node) {
-  UtilityFunctions::print(
-      "on_body_entered() just got called within mnchar.cpp.");
   Projectile *node_as_projectile = Object::cast_to<Projectile>(node);
   String firing_mnchar_id = node_as_projectile->get_firing_mnchar_id();
   emit_signal("mnchar_hit", mnchar_id, firing_mnchar_id);
@@ -133,15 +131,14 @@ void Mnchar::_physics_process(double delta) {
 
   if (input->is_action_pressed("reset_" + mnchar_id)) {
     mnchar_game_reset_timer += delta;
-  } 
-  
+  }
+
   else {
     mnchar_game_reset_timer = 0.0;
   }
 
   if (mnchar_game_reset_timer >= 2.0) {
     emit_signal("reset_game");
-    UtilityFunctions::print("reset_game signal emitted within mnchar.cpp.");
   }
 
   if ((input->is_action_just_pressed("fire_" + mnchar_id)) &&

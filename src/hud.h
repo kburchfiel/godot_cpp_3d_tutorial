@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #pragma once
 
 #include <godot_cpp/classes/canvas_layer.hpp>
@@ -45,9 +47,9 @@ public:
   Hud();
   ~Hud();
 
-  TypedDictionary<String, String> get_mnchar_id_color_name_dict();
+  TypedDictionary<String, String> get_mnchar_id_color_name_dict() const;
 
-  String get_instructions();
+  String get_instructions() const;
 
   void set_winner_text(const String winner_arg);
   void set_instructions_text(const String instructions_arg);

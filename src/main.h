@@ -19,19 +19,19 @@ class Main : public Node {
 private:
   Ref<PackedScene> mnchar_scene;
 
-  TypedDictionary<String, Vector3> mnchar_id_location_dict{
+  const TypedDictionary<String, Vector3> mnchar_id_location_dict{
       {String("0"), Vector3(15, 0, -20)},  {String("1"), Vector3(-15, 0, 20)},
       {String("2"), Vector3(-20, 0, -15)}, {String("3"), Vector3(20, 0, 15)},
       {String("4"), Vector3(-5, 0, -20)},  {String("5"), Vector3(5, 0, 20)},
       {String("6"), Vector3(-20, 0, 5)},   {String("7"), Vector3(20, 0, -5)}};
 
-  TypedDictionary<String, double> mnchar_id_rotation_dict{
+  const TypedDictionary<String, double> mnchar_id_rotation_dict{
       {String("0"), 0},           {String("1"), Math_PI},
       {String("2"), Math_PI / 2}, {String("3"), Math_PI / -2},
       {String("4"), 0},           {String("5"), Math_PI},
       {String("6"), Math_PI / 2}, {String("7"), Math_PI / -2}};
 
-  TypedDictionary<String, Color> mnchar_id_color_dict{
+  const TypedDictionary<String, Color> mnchar_id_color_dict{
       {String("0"), Color(0, 0, 1, 1)}, {String("1"), Color(0, 1, 0, 1)},
       {String("2"), Color(0, 1, 1, 1)}, {String("3"), Color(1, 0, 0, 1)},
       {String("4"), Color(1, 0, 1, 1)}, {String("5"), Color(1, 1, 0, 1)},
@@ -54,15 +54,15 @@ public:
   Main();
   ~Main();
 
-  Ref<PackedScene> get_mnchar_scene();
+  Ref<PackedScene> get_mnchar_scene() const;
   void set_mnchar_scene(Ref<PackedScene>);
 
-  void _on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
-                             String firing_mnchar_id_arg);
+  void _on_mnchar_mnchar_hit(const String hit_mnchar_id_arg,
+                             const String firing_mnchar_id_arg);
 
-  void _on_hud_start_game(Array mnchars_to_include);
+  void _on_hud_start_game(const Array mnchars_to_include);
 
-  void end_game(String winning_mnchar_id);
+  void end_game(const String winning_mnchar_id);
 
 void _on_hud_process_timer_timeout();
 

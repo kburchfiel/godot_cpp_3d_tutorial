@@ -3,7 +3,8 @@
 #include "main.h"
 
 void Main::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("get_mnchar_scene"), &Main::get_mnchar_scene);
+  ClassDB::bind_method(D_METHOD("get_mnchar_scene"), 
+  &Main::get_mnchar_scene);
   ClassDB::bind_method(D_METHOD("set_mnchar_scene", "mnchar_scene"),
                        &Main::set_mnchar_scene);
 
@@ -31,17 +32,14 @@ Main::Main() {}
 
 Main::~Main() {}
 
-Ref<PackedScene> Main::get_mnchar_scene() { return mnchar_scene; }
+Ref<PackedScene> Main::get_mnchar_scene() const { return mnchar_scene; }
 
 void Main::set_mnchar_scene(Ref<PackedScene> packed_scene) {
   mnchar_scene = packed_scene;
 }
 
-void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
-                                 String firing_mnchar_id_arg) {
-  UtilityFunctions::print("The Mnchar with an ID of ", hit_mnchar_id_arg,
-                          " was just hit by the Mnchar with an ID of ",
-                          firing_mnchar_id_arg, ".");
+void Main::_on_mnchar_mnchar_hit(const String hit_mnchar_id_arg,
+                                 const String firing_mnchar_id_arg) {
 
   int current_hit_value = hits_achieved[firing_mnchar_id_arg];
   current_hit_value += 1;
@@ -54,9 +52,6 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
   active_mnchars.erase(hit_mnchar_id_arg);
 
   generate_overall_hits_text();
-
-  UtilityFunctions::print("Current size of active_mnchars: ",
-                          active_mnchars.size());
 
   if (active_mnchars.size() == 1) {
     String winning_mnchar = *active_mnchars.begin();
@@ -74,8 +69,7 @@ void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
   }
 }
 
-void Main::_on_hud_start_game(Array mnchars_to_include) {
-
+void Main::_on_hud_start_game(const Array mnchars_to_include) {
   get_node<Hud>("Hud")->set_process_mode(PROCESS_MODE_DISABLED);
 
   active_mnchars.clear();
@@ -127,7 +121,7 @@ void Main::_on_hud_start_game(Array mnchars_to_include) {
   generate_overall_wins_text();
 }
 
-void Main::end_game(String winning_mnchar_id) {
+void Main::end_game(const String winning_mnchar_id) {
   get_tree()->call_group("mnchars", "queue_free");
 
   String new_winner_message = "The winning player \
@@ -197,9 +191,8 @@ void Main::_ready() {
 
   get_node<Hud>("Hud")->update_between_game_message();
 
-  get_node<Hud>("Hud")->connect(
-    "reset_overall_stats",
-    Callable(this, "_on_hud_reset_overall_stats"));
+  get_node<Hud>("Hud")->connect("reset_overall_stats",
+                                Callable(this, "_on_hud_reset_overall_stats"));
 }
 
 void Main::generate_overall_hits_text() {
@@ -244,7 +237,6 @@ void Main::generate_overall_wins_text() {
 }
 
 void Main::_on_mnchar_reset_game() {
-  UtilityFunctions::print("_on_mnchar_reset_game called.");
   Array hits_achieved_keys = hits_achieved.keys();
 
   for (int key_index = 0; key_index < hits_achieved_keys.size(); key_index++)

@@ -13,3 +13,6 @@ export_presets.cfg
 CMakeFiles/
 build/
 .jupyter/desktop-workspaces/default-37a8.jupyterlab-workspace
+project/Cpp 3D Tutorial.sh
+.gitignore
+project/Cpp 3D Tutorial.x86_64

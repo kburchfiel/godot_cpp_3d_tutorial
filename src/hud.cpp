@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #include "hud.h"
 
 using namespace godot;
@@ -12,11 +14,11 @@ void Hud::_bind_methods() {
   ADD_SIGNAL(MethodInfo("reset_overall_stats"));
 }
 
-TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() {
+TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() const {
   return mnchar_id_color_name_dict;
 }
 
-String Hud::get_instructions()
+String Hud::get_instructions() const
 
 {
   return instructions;
@@ -47,8 +49,6 @@ void Hud::update_between_game_message() {
 }
 
 void Hud::update_constant_message() {
-  UtilityFunctions::print("Overall hits text:", overall_hits_text);
-  UtilityFunctions::print("Overall wins text:", overall_wins_text);
   String constant_message = overall_hits_text + overall_wins_text;
   auto constant_label = get_node<Label>("ConstantLabel");
   constant_label->set_text(constant_message);
@@ -73,7 +73,6 @@ void Hud::_process(double delta) {
         (mnchars_to_include.has(strint) == false))
 
     {
-      UtilityFunctions::print("Adding player " + strint + " to the game.");
       mnchars_to_include.append(strint);
 
       entrants_text += "Added Player " + strint + " (" +
@@ -100,8 +99,6 @@ void Hud::_process(double delta) {
     if ((input->is_action_pressed("fire_" + strint)) &&
         (input->is_action_pressed("reset_" + strint)) &&
         (can_launch_new_game == true)) {
-      UtilityFunctions::print("New game requested. Players:",
-                              mnchars_to_include);
 
       instructions_text = "";
       winner_text = "";

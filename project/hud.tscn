@@ -11,9 +11,11 @@ theme_override_font_sizes/font_size = 20
 autowrap_mode = 2
 
 [node name="ConstantLabel" type="Label" parent="." unique_id=1006725121]
-offset_left = 1650.0
-offset_top = 20.0
-offset_right = 1900.0
-offset_bottom = 65.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_bottom = 45.0
+grow_horizontal = 0
 theme_override_font_sizes/font_size = 20
 autowrap_mode = 2

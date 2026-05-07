@@ -41,8 +41,8 @@ public:
   void set_mnchar_id(const String mnchar_id);
   String get_mnchar_id() const;
 
-  void start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
-             double mnchar_rotation_arg, Color mnchar_color_arg);
+  void start(const String mnchar_id_arg, const Vector3 mnchar_translate_arg,
+             const double mnchar_rotation_arg, const Color mnchar_color_arg);
 
   Ref<PackedScene> get_projectile_scene();
   void set_projectile_scene(Ref<PackedScene>);

@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #include "register_types.h"
 #include "main.h"
 #include "mnchar.h"

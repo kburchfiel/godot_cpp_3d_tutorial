@@ -1,3 +1,5 @@
+// See README for documentation and references
+
 #pragma once
 
 #include <godot_cpp/core/class_db.hpp>

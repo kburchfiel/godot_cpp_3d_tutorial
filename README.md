@@ -1,38 +1,12 @@
-## Godot CPP 3D Tutorial [Work in progress]
+# Godot CPP 3D Tutorial
 
 By Ken Burchfiel
 
-Released under the MIT license
+Tutorial and code released under the MIT license. (See License.md file for more details)
+
+*Note: Both the code and the documentation were created without the use of generative-AI tools.*
 
 This step-by-step guide will demonstrate how to create a 3D multiplayer game in Godot using C++. It is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved, both within your code editor and Godot, to put this kind of game together.
-
-*Note: This resource is being created without the use of generative-AI tools.*
-
-
-## Part 1: Getting started
-
-(Note: Many of these steps will resemble those in the excellent 'Getting started' section of the official GDExtension documentation at https://docs.godotengine.org/en/4.6/tutorials/scripting/cpp/gdextension_cpp_example.html . Certain code blocks within this section derive from that document as well.)
-
-1. Create a new folder that will store your Godot project and its corresponding code. I'll call mine `godot_cpp_3d_tutorial`, but the name you choose is of course up to you.
-
-1. First, you'll want to download the latest stable version of godot-cpp from https://github.com/godotengine/godot-cpp . (As of 2026-04-17, a stable version of version 10.x hasn't yet been released, so I went ahead and downloaded the beta version with a commit ID of 4862a9d (https://github.com/godotengine/godot-cpp/tree/4862a9dcf1471c9ea19680b9faadb5b6a9432092 .) Whether you download and unzip or simply clone it, make sure that exists within your project folder within a folder named 'godot-cpp'.
-
-1. Next, open up this godot-cpp folder within your terminal and run `scons platform=linux` (replacing `linux` with your own OS if needed). This will compile all of the source code needed to apply this library. (It will *also* generate additional code files that aren't visible in an uncompiled version of the repository, such as the one on GitHub).
-
-1. Go ahead and create a 'src' folder within your root project folder. This folder will store your source C++ code and its compiled variants.
-
-1. Create a 'project' folder within this root folder also. Next, open up Godot, which you can download from https://godotengine.org/ if you haven't already. (I'm using Godot 4.6 for this project, but this tutorial should be applicable for newer releases also for a decent while.) Within the loading screen, hit the Create button at the top left. I chose 'Cpp 3D Tutorial' as my project name and the 'project' folder I just created as my path. Once you've filled in these items, hit Create on the bottom right.
-
-    ![](## Godot CPP 3D Tutorial [Work in progress]
-
-By Ken Burchfiel
-
-Released under the MIT license
-
-This step-by-step guide will demonstrate how to create a 3D multiplayer game in Godot using C++. It is based on my [Cube Combat demo](https://github.com/kburchfiel/godot_cpp_3d_demo), but (unlike that project) guides you more explicitly through the steps involved, both within your code editor and Godot, to put this kind of game together.
-
-*Note: This resource is being created without the use of generative-AI tools.*
-
 
 ## Part 1: Getting started
 
@@ -279,7 +253,7 @@ Now that we have a class (albeit a very simple one), we can create a scene based
 
 1. Before we can get to the 'action' part of this scene, we'll need lights and a camera. Add a DirectionalLight3D as a child of Main, then set its y transform to 20.0. (The x and z transforms can stay at 0.0.) Change its x rotation to -90, or whatever allows the light to point directly down at the ground. (You'll know it's working when you see the ground brighten up.) Check the Shadow box within the Light3D section of the Inspector as well.
 
-1. Next, add a Marker3D as a child of Main and set its y and z transforms to 25.0 and -40.0, respectively. Finally, add a Camera3D as a child of the Marker3D. Set its x and y rotations (accessible within the Transform section of the Inspector) to -45 and 180, respectively. (You can scroll up to the top of the Inspector to get a preview of what the camera will display.) 
+1. Next, add a Marker3D as a child of Main and set its y and z transforms to 28.0 and -40.0, respectively. Finally, add a Camera3D as a child of the Marker3D. Set its x and y rotations (accessible within the Transform section of the Inspector) to -45 and 180, respectively. (You can scroll up to the top of the Inspector to get a preview of what the camera will display.) 
 
 1. Try running the scene again. You should now see your game area within the window that appears:
 
@@ -459,7 +433,7 @@ One option would be to instantiate a Mnchar as a child scene of main.tscn (Refer
     Next, add the following right below `~Main();`
 
     ```
-    Ref<PackedScene> get_mnchar_scene();
+    Ref<PackedScene> get_mnchar_scene() const;
     void set_mnchar_scene(Ref<PackedScene>);
     ```
 
@@ -489,7 +463,8 @@ One option would be to instantiate a Mnchar as a child scene of main.tscn (Refer
 1. In addition, add the following code below `Main::~Main() {}`:
 
     ```
-    Ref<PackedScene> Main::get_mnchar_scene() { return mnchar_scene; }
+    Ref<PackedScene> Main::get_mnchar_scene() const {
+        return mnchar_scene; }
 
     void Main::set_mnchar_scene(Ref<PackedScene> packed_scene) {
     mnchar_scene = packed_scene;
@@ -539,13 +514,13 @@ One option would be to instantiate a Mnchar as a child scene of main.tscn (Refer
     Declare a new `start()` function for the Mnchar class by adding the following code right before the final closing bracket of mnchar.h:
 
     ```
-    void start(Vector3 mnchar_translate_arg);
+    void start(const Vector3 mnchar_translate_arg);
     ```
 
     Next, add the following code to the bottom of mnchar.cpp:
 
     ```
-    void Mnchar::start(Vector3 mnchar_translate_arg)
+    void Mnchar::start(const Vector3 mnchar_translate_arg)
     {translate(mnchar_translate_arg);}
     ```
 
@@ -605,7 +580,8 @@ Because we're creating a multiplayer game, we'll want to set up our movement cod
     Finally, add a `mnchar_id_arg` argument before your `mnchar_translate_arg` within `start()` so that the declaration matches the following line:
 
     ```
-    void start(String mnchar_id_arg, Vector3 mnchar_translate_arg);
+    void start(const String mnchar_id_arg, 
+    const Vector3 mnchar_translate_arg);
     ```
 
 1. Within mnchar.cpp, add the following below your `get_movement_speed()` function definition:
@@ -982,19 +958,19 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
 1. With that rambling introduction out of the way, let's go ahead and create typed dictionaries that will store colors, rotation values, and starting locations for all of our players. Within main.h, add `#include <godot_cpp/variant/typed_dictionary.hpp>` to the bottom of your list of `#include statements`. Next, enter the following code right below `Ref<PackedScene> mnchar_scene` within the `private` section:
 
     ```
-    TypedDictionary<String, Vector3> mnchar_id_location_dict{
+    const TypedDictionary<String, Vector3> mnchar_id_location_dict{
         {String("0"), Vector3(15, 0, -20)},  {String("1"), Vector3(-15, 0, 20)},
         {String("2"), Vector3(-20, 0, -15)}, {String("3"), Vector3(20, 0, 15)},
         {String("4"), Vector3(-5, 0, -20)},  {String("5"), Vector3(5, 0, 20)},
         {String("6"), Vector3(-20, 0, 5)},   {String("7"), Vector3(20, 0, -5)}};
 
-    TypedDictionary<String, double> mnchar_id_rotation_dict{
+    const TypedDictionary<String, double> mnchar_id_rotation_dict{
         {String("0"), 0},           {String("1"), Math_PI},
         {String("2"), Math_PI / 2}, {String("3"), Math_PI / -2},
         {String("4"), 0},           {String("5"), Math_PI},
         {String("6"), Math_PI / 2}, {String("7"), Math_PI / -2}};
 
-    TypedDictionary<String, Color> mnchar_id_color_dict{
+    const TypedDictionary<String, Color> mnchar_id_color_dict{
         {String("0"), Color(0, 0, 1, 1)}, {String("1"), Color(0, 1, 0, 1)},
         {String("2"), Color(0, 1, 1, 1)}, {String("3"), Color(1, 0, 0, 1)},
         {String("4"), Color(1, 0, 1, 1)}, {String("5"), Color(1, 1, 0, 1)},
@@ -1010,8 +986,10 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
 1. Next, we need to update Mnchar::start() in order to utilize these rotation and color variables. Update your `void start()` function within mnchar.h so that it reads:
 
     ```
-    void start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
-             double mnchar_rotation_arg, Color mnchar_color_arg);
+        void start(const String mnchar_id_arg, 
+            const Vector3 mnchar_translate_arg,
+            const double mnchar_rotation_arg, 
+            const Color mnchar_color_arg);
     ```
 
 1. We'll also need to declare and define a function that can modify a Mnchar's color. Right above `void shoot_projectile();` within the `public` section of mnchar.h, add:
@@ -1056,8 +1034,11 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
 1. Replace the `Mnchar::start()` function definition within mnchar.cpp with the following code:
 
     ```
-    void Mnchar::start(String mnchar_id_arg, Vector3 mnchar_translate_arg,
-                    double mnchar_rotation_arg, Color mnchar_color_arg)
+    void Mnchar::start(
+        const String mnchar_id_arg, 
+        const Vector3 mnchar_translate_arg,
+        const double mnchar_rotation_arg, 
+        const Color mnchar_color_arg)
     {
     set_mnchar_id(mnchar_id_arg);
     UtilityFunctions::print("Mnchar's ID is ", get_mnchar_id(), ".");
@@ -1256,8 +1237,8 @@ We're very close to having a working prototype of our game--one in which two pla
 
 
     ```
-    void _on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
-                                String firing_mnchar_id_arg);
+    void _on_mnchar_mnchar_hit(const String hit_mnchar_id_arg,
+                                const String firing_mnchar_id_arg);
     ```
 
 1. Next, at the bottom of your `Main::_bind_methods()` function within main.cpp, add:
@@ -1272,8 +1253,8 @@ We're very close to having a working prototype of our game--one in which two pla
 1. Finally, right above your `void Main::_ready() function` in main.cpp, define this new `Main::_on_mnchar_mnchar_hit` function as follows:
 
     ```
-    void Main::_on_mnchar_mnchar_hit(String hit_mnchar_id_arg,
-                                    String firing_mnchar_id_arg) {
+    void Main::_on_mnchar_mnchar_hit(const String hit_mnchar_id_arg,
+                                    const String firing_mnchar_id_arg) {
     UtilityFunctions::print("The Mnchar with an ID of ", hit_mnchar_id_arg,
                             " was just hit by the Mnchar with an ID of ",
                             firing_mnchar_id_arg, ".");
@@ -1321,12 +1302,12 @@ We're very close to having a working prototype of our game--one in which two pla
 
     ![](tutorial_screenshots/mnchar_scene_group.png)
 
-1. We'll make use of this new scene group within a new `end_game()` function. Within main.h's `public` section, add `void end_game(String winning_mnchar_id);` right after your `void _on_mnchar_mnchar_hit()` function declaration. In addition, add `#include <godot_cpp/classes/scene_tree.hpp>` to the bottom to that file's list of `#include` statements.
+1. We'll make use of this new scene group within a new `end_game()` function. Within main.h's `public` section, add `void end_game(const String winning_mnchar_id);` right after your `_on_mnchar_mnchar_hit()` function declaration. In addition, add `#include <godot_cpp/classes/scene_tree.hpp>` to the bottom to that file's list of `#include` statements.
 
 1. Next, right before `void Main::_ready()` within main.cpp, define this new function as follows:
 
     ```
-    void Main::end_game(String winning_mnchar_id) {
+    void Main::end_game(const String winning_mnchar_id) {
     get_tree()->call_group("mnchars", "queue_free");
 
     String new_winner_message = "The winning player \
@@ -1339,7 +1320,7 @@ We're very close to having a working prototype of our game--one in which two pla
 
     The first line of the function removes all Mnchars within the 'mnchars' group that we just created, thus preparing our game area for a subsequent round.
 
-1. Update the `if/else if` section of `void Main::_on_mnchar_mnchar_hit())` so that it reads as follows:
+1. Update the `if/else if` section of `Main::_on_mnchar_mnchar_hit())` so that it reads as follows:
 
     ```
     if (active_mnchars.size() == 1)
@@ -1418,7 +1399,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
     Hud();
     ~Hud();
 
-    String get_instructions();
+    String get_instructions const();
 
     void set_winner_text(const String winner_arg);
 
@@ -1461,7 +1442,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
 
     void Hud::_bind_methods() {}
 
-    String Hud::get_instructions()
+    String Hud::get_instructions() const
 
     {
     return instructions;
@@ -1508,7 +1489,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
 1. We'll need to handle two different 'out-of-game' scenarios within the Hud: (1) the experience when you first launch the game, and (2) what you see after finishing a game. We'll handle the first scenario first, since it's a bit simpler. Open up main.h, then add the following line right before your `end_game()` function within the script's `public` section:
 
     ```
-    void _on_hud_start_game(Array mnchars_to_include);
+    void _on_hud_start_game(const Array mnchars_to_include);
     ```
 
 1. In addition, add `#include "hud.h"` right below `#include "mnchar.h"` within this script's list of `#include` statements.
@@ -1516,7 +1497,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
 1. Next, right before your `Main::end_game()` function definition within main.cpp, add:
 
     ```
-    void Main::_on_hud_start_game(Array mnchars_to_include)
+    void Main::_on_hud_start_game(const Array mnchars_to_include)
     {
     }
     ```
@@ -1602,7 +1583,7 @@ To implement these enhancements, we'll create a new Hud class that can display i
         "start_game", PropertyInfo(Variant::ARRAY, "mnchars_to_include")));
     ```
 
-    This signal will soon get processed by main.cpp's `_on_hud_start_game` function. By the way, if you need to check how to specify a given Variant within the PropertyInfo section of an ADD_SIGNAL() call, you can check the godot-cpp code's variant.hpp file (reference 50), which includes types like Variant:ARRAY and Variant:DICTIONARY.)
+    This signal will soon get processed by main.cpp's `_on_hud_start_game()` function. By the way, if you need to check how to specify a given Variant within the PropertyInfo section of an ADD_SIGNAL() call, you can check the godot-cpp code's variant.hpp file (reference 50), which includes types like Variant:ARRAY and Variant:DICTIONARY.)
 
     (References 1 and 50)
     
@@ -1761,15 +1742,15 @@ Right now, we're referring to players using integers. However, these numbers won
 1. In addition, right after `~Hud();` within hud.h's `public` section, add:
 
     ```
-    TypedDictionary<String, String> get_mnchar_id_color_name_dict();
+    TypedDictionary<String, String> get_mnchar_id_color_name_dict() const;
     ```
 
     This will allow the Main class to retrieve this new dictionary. (We could also simply have made this dictionary public.)
 
-1. Within hud.cpp, add the following function right before `String Hud::get_instructions()`:
+1. Within hud.cpp, add the following function right before your`Hud::get_instructions()` definition:
 
     ```
-    TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() {
+    TypedDictionary<String, String> Hud::get_mnchar_id_color_name_dict() const {
     return mnchar_id_color_name_dict;
     }
     ```
@@ -1919,11 +1900,13 @@ Right now, we're referring to players using integers. However, these numbers won
 
 1. While you're within the editor, Go ahead and add another Label child of Hud within hud.tscn. Rename it 'ConstantLabel'. Within the Inspector, set its Autowrap value to Word. We'll make use of this new label very soon.
 
-1. This label will get displayed on the right side of the screen so as not to overlap with the between-game message. However, before we can set its specific location, we should first expand the game window to full-HD dimensions. Go to Project --> Project Settings, then select the 'Display' section within the menu on the left. Change the Viewport Width and Viewport Height options within the Window menu to 1920 and 1080, respectively. 
+1. This label will get displayed on the right side of the screen so as not to overlap with the between-game message. However, before we can set its specific location, we should first expand the game window to full-HD dimensions. Go to Project --> Project Settings, then select the Display-->Window section within the menu on the left. Change the Viewport Width and Viewport Height options within the Window menu to 1920 and 1080, respectively. 
 
     (You're welcome to choose smaller dimensions in order to allow your game to display on smaller monitors; you'll just then need to modify certain label settings specified in this tutorial in order to make them compatible with these custom dimensions.)
 
-1. Next, within the Layout section of the ConstantLabel's Inspector window, set the Size's x value to 250.0 pixels and the Position's x value to 1650.0 pixels. (1920 - 250 - 20 (the same buffer we're using for our BetweenGameLabel) equals 1650.) 
+1. Next, within the Layout section of the ConstantLabel's Inspector window, set the Size's x value to 250.0 pixels. In addition, set the Position's x and y values to 1650.0 and 20.0 pixels, respectively. (1920 - 250 - 20 (the same buffer we're using for our BetweenGameLabel) equals 1650.) These options should provide enough room for each statistic to appear within a single line while preventing text from overlapping with the game area, at least within normal gameplay durations.
+
+    *Note: Many of the screenshots in this tutorial reflect an earlier set of text options--so don't worry if the ConstantLabel text within your game doesn't match these screenshots.*
 
 1. Now that we have a larger game window, we should also increase our font sizes accordingly. Within the Theme Overrides section of the ConstantLabel inspector, click on Font Sizes, then set the Font Size value to 20 pixels. 
 
@@ -2124,7 +2107,7 @@ This part of the tutorial will add both of these features to the game using the 
 
     This function first removes any hits scored within the current game from the overall-hits dictionary; that way, such hits won't count going forward. It then clears out the hits_achieved dictionary (so any hits within the game won't be reported within the between-game message); updates the game's overall-hits text; and calls end_game() without declaring any player the winner.
 
-1. This new code won't have any effect quite yet, as we haven't yet connected the `reset_game` signal emitted by the Mnchar to the Main class's corresponding function. To make this connection, add the following code right after `new_mnchar->connect("mnchar_hit", Callable(this, "_on_mnchar_mnchar_hit"));` within `Main::_on_hud_start_game`:
+1. This new code won't have any effect quite yet, as we haven't yet connected the `reset_game` signal emitted by the Mnchar to the Main class's corresponding function. To make this connection, add the following code right after `new_mnchar->connect("mnchar_hit", Callable(this, "_on_mnchar_mnchar_hit"));` within `Main::_on_hud_start_game()`:
 
     ```
     new_mnchar->connect("reset_game", Callable(this, "_on_mnchar_reset_game"));
@@ -2300,15 +2283,31 @@ First, you may have noticed that players can travel off the game area--and, inde
 
 ## Part 20: Exporting the game
 
-# Here with editing: Show how to export this game (which will also involve creating a release version of your godot-cpp file).
+1. In order to make the game easier to distribute, it will be helpful to create a single-file release version. The first step is to create a release verison of your code. Navigate to your project's root folder in your terminal (e.g. the same folder from which you normally compile your code), then run the following command:
+
+```scons platform=linux target=template_release```
+
+    (Replace 'linux' with your own operating system if needed.)
+
+    This will create a *release* copy of both your own source code and your godot-cpp files. If you navigate to /project/bin, you should find your new shared release library under `libgdexample.linux.template_release.x86_64.so` (though your exact name might differ, particularly if you're not using Linux).
+
+    (Reference 57)
+
+1. Select Project --> Export...; click the 'Add...' button next to Presets in the top left; and select your operating system of choice (Linux in my case). 
+
+1. If you haven't exported a game before, you'll probably see a series of red error messages that begin with "No export template found at the expected path:". To resolve this, simply click on the 'Manage Export Templates' text below the error messages, then click 'Download and Install' to the right of the 'Download from:' option. Depending on your internet speed, it may take a little while to download all of the templates. (Reference 58)
+
+    Once the templates have finished downloading, go back to Project --> Export to reopen the Export menu.
+
+1. Click the 'On' button to the right of the 'Embed PCK' option. Next, select Export Project. Deselect the 'Export with Debug' option below the 'File:' text box. Hit Save, and you should see two files within your project/ folder--one that contains your program, and another that contains your shared library. (In my case, these are named 'Cpp 3D Tutorial.x86_64' and 'libgdexample.linux.template_release.x86_64.so', respectively.)
+
+1. To make these two files easier to share, you may want to compress them into a .zip file. Note that the game will *not* work correctly if the shared library isn't in the same folder as the executable.
 
 ## The end
 
-**Congratulations!** You have now programmed a multiplayer 3D game in C++ using Godot and its GDExtension feature.
+**Congratulations!** You have now programmed a multiplayer 3D game in C++ using Godot and its GDExtension feature. I had a lot of fun putting this game and tutorial together, and I hope it helps you in your future programming endeavors!
 
-## Future editing notes
-
-1. Try to make as many items `const` as possible. You can also make functions `const` as well as long as they don't modify the class; see p. 50 of A Tour of C++ (2nd edition).
+    --Ken Burchfiel
 
 
 ## References
@@ -2438,3 +2437,7 @@ Notes:
 * Reference 55: /godot-cpp/gen/include/godot_cpp/variant/dictionary.hpp
 
 * Reference 56: https://godotforums.org/d/33822-how-to-loop-a-dictionary-in-godot-c-gdextension/3tutorial_screenshots/new_game_project.png)
+
+* Reference 57: https://docs.godotengine.org/en/stable/engine_details/development/compiling/compiling_for_linuxbsd.html
+
+* Reference 58: https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html
