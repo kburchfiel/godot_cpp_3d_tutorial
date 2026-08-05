@@ -253,6 +253,8 @@ Now that we have a class (albeit a very simple one), we can create a scene based
 
     If you *don't* see this node (a situation I've faced quite a few times), this likely means that you forgot one of the earlier steps (such as adding references to this node to your register_types.cpp file). 
 
+    However, I should mention that, a few months after finishing this tutorial, I found that the following steps--for whatever reason--did *not* cause my Main class to appear. After a long stretch of debugging, I (1) restarted my computer and (2) replaced my godot-cpp version (which was the latest verison as of August 4, 2026) with the exact same version used in this project. I'm not sure which of these steps, exactly, resolved the problem, but consider trying them out if you're still encountering issues.
+
 1. Select this node, then save your scene as main.tscn. Next, click the play button near the top right of the editor in order to get the debug message we defined within `Main::_ready()` to display. This will bring up a scene-selection dialog box; you can hit 'Select Current', since we'll indeed want this to be our main scene.
 
 
