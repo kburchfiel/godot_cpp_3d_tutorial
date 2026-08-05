@@ -46,6 +46,8 @@ This project is dedicated to my wife, Allie. I am very grateful for her patience
 
     ![](tutorial_screenshots/new_game_project.png)
 
+    **Note: Because you've already created a project folder, you should *deselect* the 'Create folder' option on the top right. (See screenshot for an example.) Otherwise, Godot will create a new project folder within your project folder, which could cause problems down the road.
+
 
 1. Close back out of the editor for now. Before we create a scene, we should first create a GDExtension class within C++ that can be used as the basis for that scene. (This is a different approach than what you might be used to with GDScript.)
 
