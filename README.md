@@ -978,7 +978,7 @@ Since having two identical Mnchars within a scene can get confusing, this will a
 
 Finally, since we're adding a typed dictionary for player colors, we may as well add ones for starting locations and rotation values as well, as these will also play an important role in initializing new Mnchars.
 
-(This is a bit like If You Give a Mouse a Cookie, but in game-development form! It's funny quickly one programming task can lead to five others.)
+(This is a bit like If You Give a Mouse a Cookie, but in game-development form! It's funny how quickly one programming task can lead to five others.)
 
 1. With that rambling introduction out of the way, let's go ahead and create typed dictionaries that will store colors, rotation values, and starting locations for all of our players. Within main.h, add `#include <godot_cpp/variant/typed_dictionary.hpp>` to the bottom of your list of `#include statements`. Next, enter the following code right below `Ref<PackedScene> mnchar_scene` within the `private` section:
 
