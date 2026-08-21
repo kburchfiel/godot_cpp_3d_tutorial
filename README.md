@@ -1002,7 +1002,7 @@ Finally, since we're adding a typed dictionary for player colors, we may as well
         {String("6"), Color(1, 1, 1, 1)}, {String("7"), Color(0, 0, 0, 1)}};
     ```
 
-    This code is based on references 32 (an overview of Godot's own core types) and 33 (the example.cpp file within the godot-cpp repository). Both of these resources proved very helpful in working with Godot types like TypedDictionary, so I highly recommend checking them out if you aren't already familiar with them. The syntax is also similar to that for `std::map` (see reference 35).
+    This code is based on references 32 (an overview of Godot's own core types) and 33 (the my_test.cpp file within the godot-cpp repository). Both of these resources proved very helpful in working with Godot types like TypedDictionary, so I highly recommend checking them out if you aren't already familiar with them. The syntax is also similar to that for `std::map` (see reference 35).
 
     Each of these dictionaries uses string-based IDs as keys and various initialization settings (namely, starting locations, starting rotations, and colors) as values. The transforms and rotations allow for an adequate amount of space between players while keeping them all facing towards the game area. (I also needed to make sure that no player would begin in another's direct line of fire.)
 
@@ -2481,7 +2481,8 @@ Notes:
 
 * Reference 32: https://docs.godotengine.org/en/stable/engine_details/architecture/core_types.html
 
-* Reference 33: https://github.com/godotengine/godot-cpp/blob/master/test/src/example.cpp
+* Reference 33: https://github.com/godotengine/godot-cpp/blob/master/test/src/my_test.cpp
+    (Fomerly available at https://github.com/godotengine/godot-cpp/blob/master/test/src/example.cpp)
 
 * Reference 34: /godot_cpp/core/math_defs.hpp
 
@@ -2555,7 +2556,7 @@ Remember that a given function might be available within a class's parent. For e
 
 Certain C++ API code, however, may not have any GDScript equivalent. In that case, you may need to instead look at the reference information for the Godot Engine's own source code--or directly at the code itself. For example, the Core Types page (https://docs.godotengine.org/en/stable/engine_details/architecture/core_types.html) was a huge help when adding dictionaries and sets into my code.
 
-Of course, existing code that makes use of the C++ API can be very useful as well. For instance, the source code for the 'test' section of the godot-cpp project (https://github.com/godotengine/godot-cpp/tree/master/test/src), such as the example.cpp file (https://github.com/godotengine/godot-cpp/blob/master/test/src/example.cpp), was a lifesaver when I was trying to figure out how to get a TypedDictionary to work with my project. See the 'References and resources' section near the top of this page for more examples.
+Of course, existing code that makes use of the C++ API can be very useful as well. For instance, the source code for the 'test' section of the godot-cpp project (https://github.com/godotengine/godot-cpp/tree/master/test/src), such as the my_test.cpp file (https://github.com/godotengine/godot-cpp/blob/master/test/src/my_test.cpp), was a lifesaver when I was trying to figure out how to get a TypedDictionary to work with my project. See the 'References and resources' section near the top of this page for more examples.
 
 The gdnative-gdextension channel within the Godot-engine Discord (https://discord.com/invite/godotengine) is another great resource to bookmark. I'm very grateful to the participants who helped clarify the questions I asked of them there.
 
