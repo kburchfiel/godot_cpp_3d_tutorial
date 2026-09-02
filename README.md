@@ -2334,6 +2334,27 @@ First, you may have noticed that players can travel off the game area--and, inde
 
     ![](tutorial_screenshots/8_player_gameplay.png)
 
+1. It's also possible to create a release that will work on a separate operating system. For instance, to create an export for Windows while running Godot in Linux, you can do the following:
+
+1. Make sure you have mingw-w64 installed. The installation method featured at https://www.mingw-w64.org/getting-started/debian/ worked great for me on Linux Mint.
+
+1. Run ```scons platform=windows target=template_release``` to compile your game's code for Windows. (If you don't take this step, you'll get an error message related to a missing x86_64.dll file when you attempt to export it.)
+
+1. Choose the Windows Dekstop (Runable) preset. (Install it beforehand if needed). As shown in the previous steps, you'll want to choose 'On' for the Embed PCK option; click Export Project; deselect the 'Export With Debug' option; and then hit Save.
+
+1. If you get an error message related to a missing "./gdexample.windows.template_release.x86_64.dll" file, it's possible that there's a mismatch between the filenames in your gdexample.gdextension file and those in your /project/bin folder. In my case, my gdexample.gdextension file had the following line:
+
+    ```windows.release.x86_64 = "./gdexample.windows.template_release.x86_64.dll"```
+
+    However, the Windows release DLL in my /project/bin folder was titled 'libgdexample.windows.template_release.x86_64.dll'. To resolve this issue, I simply replaced the previous line in my gdexample.gdextension file with:
+
+    ```windows.release.x86_64 = "./libgdexample.windows.template_release.x86_64.dll"```
+
+    Now that these two filenames matched, I was able to successfully export my project.
+
+1. The Windows-specific release files will appear within your project/ folder as Cpp 3D Tutorial.exe and libgdexample.windows.template_release.x86_64.dll (or something similar--just look for the .exe and .dll files rather than the .x86_64 and .so files). I recommend copying them into a separate folder, then compressing them.
+
+1. Exporting for MacOS may be a bit trickier. See the discussion at https://forum.godotengine.org/t/i-need-help-exporting-to-macos/119207 for some initial steps.
 
 **Congratulations!** You have now programmed a multiplayer 3D game in C++ using Godot and its GDExtension feature. I had a lot of fun putting this game and tutorial together, and I hope it helps you in your future programming endeavors!
 
